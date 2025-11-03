@@ -3,12 +3,12 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig({
-  root: path.resolve(__dirname, 'src/client'),
+  root: path.resolve(__dirname),
   plugins: [react()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'),
-      '@shared': path.resolve(__dirname, '../../shared')
+      '@': path.resolve(__dirname, '../src'),
+      '@shared': path.resolve(__dirname, '../../../shared')
     }
   },
   server: {
@@ -24,10 +24,10 @@ export default defineConfig({
     }
   },
   build: {
-    outDir: path.resolve(__dirname, 'dist'),
+    outDir: path.resolve(__dirname, '../../dist'),
     emptyOutDir: true,
     rollupOptions: {
-      input: path.resolve(__dirname, 'src/client/index.html')
+      input: path.resolve(__dirname, 'index.html')
     }
   }
 });
