@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: orientai-backend
+    env: node
+    rootDir: src/server
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+
+  - type: static
+    name: orientai-frontend
+    rootDir: src/client
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist

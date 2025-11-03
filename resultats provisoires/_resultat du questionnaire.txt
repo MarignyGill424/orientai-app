@@ -1,0 +1,50 @@
+{
+    "prenom": "Elowyne",
+    "age": 17,
+    "genre": "femme",
+    "mobilite": "Dubai",
+    "disponibilite": "temps-plein",
+    "argent": "acheter un cheval et faire de l'équitation",
+    "citation": "",
+    "passion1": "animaux",
+    "passion2": "chevaux",
+    "passion3": "",
+    "passion4": "K-pop",
+    "passion5": "",
+    "interet": [
+        "Animaux",
+        "Sport",
+        "Dessiner",
+        "S'occuper des animaux"
+    ],
+    "ileDeserte": "Outil multifonction",
+    "videos": "Humour",
+    "appMagique": "",
+    "aspirations": "s'occuper d'animaux",
+    "inspirations": "",
+    "apprentissage": "",
+    "apprentissageStyle": [
+        "Visuel"
+    ],
+    "environnement": [
+        "En extérieur"
+    ],
+    "teletravail": "",
+    "valeurs_generales": [
+        "Respect de l'environnement"
+    ],
+    "connaissance": false,
+    "benevolat": "Non",
+    "valeur_justice": 3,
+    "valeur_aventure": 3,
+    "valeur_creativite": 4,
+    "valeur_securite": 3,
+    "valeur_aider": 2,
+    "valeur_autonomie": 4,
+    "valeur_curiosite": 3,
+    "valeur_collaboration": 2,
+    "valeur_reconnaissance": 3,
+    "valeur_equilibre": 3,
+    "valeur_defis": 3,
+    "valeur_nature": 4
+}

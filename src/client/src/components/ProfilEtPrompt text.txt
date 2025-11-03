@@ -1,0 +1,99 @@
+import React from "react";
+
+export function ProfilEtPrompt({ data }) {
+  if (!data) return null;
+
+  const valeursPhares = [
+    "valeur_aventure",
+    "valeur_creativite",
+    "valeur_securite",
+    "valeur_aider",
+    "valeur_autonomie",
+    "valeur_curiosite",
+    "valeur_collaboration",
+    "valeur_reconnaissance",
+    "valeur_equilibre",
+    "valeur_defis",
+    "valeur_justice",
+    "valeur_nature",
+  ];
+
+  const buildGeminiPrompt = (data) => {
+    return `
+Voici le profil d’un(e) adolescent(e) :
+
+- Prénom : ${data.prenom ?? "non précisé"}
+- Âge : ${data.age ?? "non précisé"}
+- Genre : ${data.genre ?? "non précisé"}
+- Localisation : ${data.localisation ?? "non précisée"}
+- Disponibilité : ${data.disponibilite ?? "non précisée"}
+- Centres d’intérêt : ${Array.isArray(data.interet) ? data.interet.join(", ") : "non précisés"}
+- Aspirations : ${data.aspirations ?? "non précisées"}
+- Si l'argent n'était pas un problème : ${data.argent ?? "non précisé"}
+- Devise personnelle : ${data.citation ?? "non précisée"}
+- Passions principales : ${[data.passion1, data.passion2, data.passion3, data.passion4, data.passion5].filter(Boolean).join(", ") || "non précisées"}
+- Talents naturels : ${Array.isArray(data.talent) ? data.talent.join(", ") : "non précisés"}
+- Inspirations : ${data.inspirations ?? "non précisé"}
+- Apprentissage hors école : ${data.apprentissage ?? "non précisé"}
+- Objet pour une île déserte : ${data.ileDeserte ?? "non précisé"}
+- Vidéos préférées : ${data.videos ?? "non précisé"}
+- Application magique : ${data.appMagique ?? "non précisée"}
+- Style d’apprentissage : ${Array.isArray(data.apprentissageStyle) ? data.apprentissageStyle.join(", ") : "non précisé"}
+- Valeurs : ${Array.isArray(data.valeurs_generales) ? data.valeurs_generales.join(", ") : "non précisées"}
+- Valeurs phares : ${valeursPhares.map((key) => `${key.replace("valeur_", "")}: ${data[key] ?? "?"}`).join(", ")}
+- Bénévolat : ${data.benevolat ?? "non précisé"}
+
+À partir de ce profil, propose-lui des pistes d’orientation adaptées à son âge, ses passions, ses valeurs et son style d’apprentissage. Sois bienveillant, clair, et encourageant.
+    `.trim();
+  };
+
+  const prompt = buildGeminiPrompt(data);
+
+  return (
+    <div className="mt-8 space-y-6">
+      <div className="p-6 bg-indigo-50 border-l-4 border-indigo-400 rounded shadow">
+        <h2 className="text-xl font-bold mb-2">🧭 Profil d’orientation</h2>
+        <p><strong>Prénom :</strong> {data.prenom ?? "non précisé"}</p>
+        <p><strong>Âge :</strong> {data.age ?? "non précisé"}</p>
+        <p><strong>Genre :</strong> {data.genre ?? "non précisé"}</p>
+        <p><strong>Localisation :</strong> {data.localisation ?? "non précisée"}</p>
+        <p><strong>Disponibilité :</strong> {data.disponibilite ?? "non précisée"}</p>
+        <p><strong>Centres d’intérêt :</strong> {Array.isArray(data.interet) ? data.interet.join(", ") : "non précisés"}</p>
+        <p><strong>Aspirations :</strong> {data.aspirations ?? "non précisées"}</p>
+        <p><strong>Si l'argent n'était pas un problème :</strong> {data.argent ?? "non précisé"}</p>
+        <p><strong>Devise personnelle :</strong> {data.citation ?? "non précisée"}</p>
+        <p><strong>Top 5 passions :</strong> {[data.passion1, data.passion2, data.passion3, data.passion4, data.passion5].filter(Boolean).join(", ") || "non précisées"}</p>
+        <p><strong>Talents naturels :</strong> {Array.isArray(data.talent) ? data.talent.join(", ") : "non précisés"}</p>
+        <p><strong>Ce qui t’inspire :</strong> {data.inspirations ?? "non précisé"}</p>
+        <p><strong>Ce que tu aimes apprendre en dehors de l’école :</strong> {data.apprentissage ?? "non précisé"}</p>
+        <p><strong>Objet pour une île déserte :</strong> {data.ileDeserte ?? "non précisé"}</p>
+        <p><strong>Vidéos préférées :</strong> {data.videos ?? "non précisé"}</p>
+        <p><strong>Application magique :</strong> {data.appMagique ?? "non précisée"}</p>
+        <p><strong>Style d’apprentissage :</strong> {Array.isArray(data.apprentissageStyle) ? data.apprentissageStyle.join(", ") : "non précisé"}</p>
+        <p><strong>Valeurs :</strong> {Array.isArray(data.valeurs_generales) ? data.valeurs_generales.join(", ") : "non précisées"}</p>
+        <div className="mt-4">
+          <strong>Valeurs phares :</strong>
+          <ul className="list-disc list-inside">
+            {valeursPhares.map((key) => (
+              <li key={key}>
+                {key.replace("valeur_", "").replaceAll("_", " ")} : {data[key] ?? "non notée"}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <p><strong>Bénévolat :</strong> {data.benevolat ?? "non précisé"}</p>
+      </div>
+
+      <div className="p-6 bg-yellow-50 border-l-4 border-yellow-400 rounded shadow">
+        <h2 className="text-xl font-bold mb-2">📋 Prompt envoyé à Gemini</h2>
+        <pre className="whitespace-pre-wrap text-sm text-gray-800">{prompt}</pre>
+        <button
+          onClick={() => navigator.clipboard.writeText(prompt)}
+          className="mt-4 px-4 py-2 bg-yellow-600 text-white rounded shadow hover:bg-yellow-700"
+        >
+          Copier le prompt
+        </button>
+      </div>
+    </div>
+  );
+}

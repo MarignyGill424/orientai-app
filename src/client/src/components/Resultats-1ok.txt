@@ -1,0 +1,140 @@
+import React from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { OrientationResults } from "../types";
+import TypewriterText from "../components/TypewriterText";
+
+export default function Resultats() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const profil = location.state as OrientationResults;
+
+  console.log("📦 Profil reçu :", profil);
+
+  // 🛠️ Fonction pour télécharger les conseils
+  function downloadConseils(conseils: Record<string, string>) {
+    const contenu = Object.entries(conseils)
+      .map(([key, value]) => `🔹 ${key.replaceAll("_", " ").toUpperCase()}\n${value}\n`)
+      .join("\n\n");
+
+    const blob = new Blob([contenu], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "conseils_orientation.txt";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  if (!profil || typeof profil !== "object") {
+    return (
+      <div style={{ padding: "2rem" }}>
+        <h1>❌ Aucun profil à afficher</h1>
+        <p>Il semble que les données n’aient pas été transmises correctement.</p>
+        <button onClick={() => navigate("/")}>🔙 Retour au questionnaire</button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ padding: "2rem" }}>
+      <h1>🎓 Ton profil d’orientation</h1>
+
+      {profil.analyse_profil ? (
+        <>
+          <h2>🧠 Analyse du profil</h2>
+          {typeof profil.analyse_profil === "string" ? (
+            <TypewriterText text={profil.analyse_profil} speed={25} />
+          ) : (
+            <ul>
+              {Object.entries(profil.analyse_profil).map(([key, value]) => (
+                <li key={key}>
+                  <strong>{key.replaceAll("_", " ")} :</strong> {value}
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      ) : (
+        <p>Profil de personnalité non disponible.</p>
+      )}
+
+      {Array.isArray(profil.recommandations_carrieres) && profil.recommandations_carrieres.length > 0 ? (
+        <>
+          <h2>🎯 Métiers suggérés</h2>
+          <ul>
+            {profil.recommandations_carrieres.map((metier, index) => (
+              <li key={index} style={{ marginBottom: "1rem" }}>
+                <strong>{metier.titre}</strong> — {metier.description}
+                {metier.pourquoi_innovant_non_traditionnel && (
+                  <p><em>💡 Pourquoi c’est innovant :</em> {metier.pourquoi_innovant_non_traditionnel}</p>
+                )}
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : (
+        <p>Aucun métier suggéré pour l’instant.</p>
+      )}
+
+      <h2>🏝️ Ton île déserte</h2>
+      {profil.ileDeserte ? (
+        <p>
+          <strong>{profil.ileDeserte}</strong> — {profil.interpretation_ileDeserte || "Interprétation non disponible"}
+        </p>
+      ) : (
+        <p>Aucune sélection pour l’île déserte.</p>
+      )}
+
+      <h2>🎬 Tes vidéos préférées</h2>
+      {profil.videos ? (
+        <p>
+          <strong>{profil.videos}</strong> — {profil.interpretation_videos || "Interprétation non disponible"}
+        </p>
+      ) : (
+        <p>Aucune vidéo sélectionnée pour le moment.</p>
+      )}
+
+      {profil.conseils_generaux && typeof profil.conseils_generaux === "object" ? (
+        <>
+          <h2>📚 Conseils généraux</h2>
+          <ul style={{ listStyle: "none", paddingLeft: 0 }}>
+            {Object.entries(profil.conseils_generaux).map(([key, value]) => {
+              let icon = "🧭";
+              if (key.toLowerCase().includes("formation")) icon = "🎓";
+              else if (key.toLowerCase().includes("carriere")) icon = "💼";
+              else if (key.toLowerCase().includes("bien_etre") || key.toLowerCase().includes("mental")) icon = "🧘";
+              else if (key.toLowerCase().includes("social")) icon = "🤝";
+
+              return (
+                <li key={key} style={{ marginBottom: "1rem", background: "#f9f9f9", padding: "1rem", borderRadius: "8px" }}>
+                  <strong>{icon} {key.replaceAll("_", " ").toUpperCase()}</strong>
+                  <p style={{ marginTop: "0.5rem" }}>{value}</p>
+                </li>
+              );
+            })}
+          </ul>
+
+          <div style={{ marginTop: "1rem" }}>
+            <button onClick={() => downloadConseils(profil.conseils_generaux)}>
+              📥 Télécharger mes conseils
+            </button>
+          </div>
+        </>
+      ) : (
+        <p>Aucun conseil disponible pour le moment.</p>
+      )}
+
+      {profil.message_inspirant && (
+        <blockquote style={{ fontStyle: "italic", marginTop: "2rem" }}>
+          💬 {profil.message_inspirant}
+        </blockquote>
+      )}
+
+      <div style={{ marginTop: "2rem" }}>
+        <button onClick={() => navigate("/")}>🔁 Recommencer le questionnaire</button>
+      </div>
+    </div>
+  );
+}

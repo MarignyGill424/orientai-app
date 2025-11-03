@@ -1,0 +1,80 @@
+🧭 Profil d’orientation
+Prénom : Elowyne
+
+Âge : 17
+
+Genre : femme
+
+Localisation : non précisée
+
+Disponibilité : temps-plein
+
+Centres d’intérêt : Animaux, Sport, Dessiner, S'occuper des animaux
+
+Aspirations : etre riche et s'occupper d'animaux
+
+Si l'argent n'était pas un problème : acheter un cheval et faire de l'équitation
+
+Devise personnelle : pierre qui roule n'amasse pas mousse
+
+Top 5 passions : animaux, chevaux, danse hip hop, K-pop
+
+Talents naturels : non précisés
+
+Ce qui t’inspire : jeunes danseurs de K-pop
+
+Ce que tu aimes apprendre en dehors de l’école : danse
+
+Objet pour une île déserte : Outil multifonction
+
+Vidéos préférées : Humour
+
+Application magique : une appli pour être riche
+
+Style d’apprentissage : Visuel
+
+Valeurs : Respect de l'environnement
+
+Valeurs phares :
+aventure : 4
+creativite : 4
+securite : 3
+aider : 2
+autonomie : 3
+curiosite : 3
+collaboration : 2
+reconnaissance : 3
+equilibre : 3
+defis : 3
+justice : 3
+nature : 4
+Bénévolat : Non
+
+📋 Prompt envoyé à Gemini
+Voici le profil d’un(e) adolescent(e) :
+
+- Prénom : Elowyne
+- Âge : 17
+- Genre : femme
+- Localisation : non précisée
+- Disponibilité : temps-plein
+- Centres d’intérêt : Animaux, Sport, Dessiner, S'occuper des animaux
+- Aspirations : etre riche et s'occupper d'animaux
+- Si l'argent n'était pas un problème : acheter un cheval et faire de l'équitation
+- Devise personnelle : pierre qui roule n'amasse pas mousse
+- Passions principales : animaux, chevaux, danse hip hop, K-pop
+- Talents naturels : non précisés
+- Inspirations : jeunes danseurs de K-pop
+- Apprentissage hors école : danse
+- Objet pour une île déserte : Outil multifonction
+- Vidéos préférées : Humour
+- Application magique : une appli pour être riche
+- Style d’apprentissage : Visuel
+- Valeurs : Respect de l'environnement
+- Valeurs phares : aventure: 4, creativite: 4, securite: 3, aider: 2, autonomie: 3, curiosite: 3, collaboration: 2, reconnaissance: 3, equilibre: 3, defis: 3, justice: 3, nature: 4
+- Bénévolat : Non
+
+À partir de ce profil, propose-lui des pistes d’orientation adaptées à son âge, ses passions, ses valeurs 
+et son style d’apprentissage. Sois bienveillant, clair, et encourageant.
+Copier le prompt
+Précédent

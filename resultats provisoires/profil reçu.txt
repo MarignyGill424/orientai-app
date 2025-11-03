@@ -1,0 +1,54 @@
+{
+    "prenom": "Elowyne2",
+    "age": 18,
+    "genre": "femme",
+    "mobilite": "",
+    "disponibilite": "temps-plein",
+    "argent": "acheter un cheval et faire de l'équitation",
+    "citation": "pierre qui roule n'amasse pas mousse",
+    "passion1": "animaux",
+    "passion2": "chevaux",
+    "passion3": "danse hip hop",
+    "passion4": "K-pop",
+    "passion5": "",
+    "interet": [
+        "Animaux"
+    ],
+    "ileDeserte": "Outil multifonction",
+    "videos": "",
+    "appMagique": "",
+    "competences": [
+        "Sport"
+    ],
+    "talents": [
+        "Dessiner",
+        "S'occuper des animaux"
+    ],
+    "aspirations": "gagner de l'argent et s'occuper d'animaux",
+    "inspirations": "des groupe de danseurs de K-pop",
+    "apprentissage": "",
+    "apprentissageStyle": [
+        "Visuel"
+    ],
+    "environnement": [
+        "En extérieur"
+    ],
+    "teletravail": "",
+    "valeurs_generales": [
+        "Respect de l'environnement"
+    ],
+    "connaissance": false,
+    "benevolat": "Non",
+    "valeur_aventure": 4,
+    "valeur_creativite": 4,
+    "valeur_securite": 3,
+    "valeur_aider": 2,
+    "valeur_autonomie": 4,
+    "valeur_curiosite": 3,
+    "valeur_collaboration": 2,
+    "valeur_reconnaissance": 3,
+    "valeur_equilibre": 3,
+    "valeur_defis": 3,
+    "valeur_justice": 3,
+    "valeur_nature": 4
+}

@@ -1,0 +1,24 @@
+
+F:\Gill\divers\_Outils - etudes\Elowyne\replit\orientai-app
+├── arborescence-complete.txt
+├── arborescence.txt
+├── archietcture serveur.docx
+├── index.ts
+├── index.ts sous oreintAI-app.txt
+├── index_unused.ts
+├── node_modules
+├── package-lock.json
+├── package.json
+├── routes.ts
+├── shared
+├── src
+├── test-server.js
+├── test.ts
+├── tsconfig.json
+└── ~$chietcture serveur.docx
+
+directory: 3 file: 13
+
+
+
+[2K[1G

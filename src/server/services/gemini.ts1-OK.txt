@@ -1,0 +1,149 @@
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import dotenv from "dotenv";
+import path from "path";
+
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
+
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+console.log("🔑 Clé Gemini chargée :", GEMINI_API_KEY?.slice(0, 5));
+
+if (!GEMINI_API_KEY) {
+  console.warn("⚠️ Clé API Gemini manquante. Réponse simulée activée.");
+}
+
+const ai = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
+
+function normalizeGeminiResponse(parsed: any) {
+  const rawMetiers = parsed.recommandations_carrieres || [];
+
+  const metiers = rawMetiers.map((m: any) => ({
+    titre: m.titre || "Métier sans titre",
+    description: m.description || "",
+    pourquoi_innovant_non_traditionnel: m.pourquoi_innovant_non_traditionnel || "",
+    competences_cles: m.competences_cles || [],
+    etapes_concretes: m.etapes_concretes || [],
+  }));
+
+  return {
+    analyse_profil: parsed.analyse_profil || null,
+    recommandations_carrieres: metiers,
+    conseils_generaux: parsed.conseils_generaux || { recommandations: [] }
+  };
+}
+
+async function generateProfilPrincipal(formulaire: any) {
+  if (!ai) throw new Error("Gemini API non initialisée");
+  const model = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+  const prompt = `Tu es un expert en orientation scolaire et professionnelle.
+
+Analyse le profil suivant et génère une réponse STRICTEMENT au format JSON avec les clés suivantes :
+- analyse_profil
+- recommandations_carrieres (tableau de 3 objets avec les clés : titre, description, pourquoi_innovant_non_traditionnel, competences_cles, etapes_concretes)
+- conseils_generaux (avec la clé recommandations, tableau de phrases)
+
+Ne commente pas. Ne reformule pas. Ne mets aucun texte hors du JSON.
+
+Profil :
+${JSON.stringify(formulaire, null, 2)}`;
+
+  const result = await model.generateContent({
+    contents: [{ role: "user", parts: [{ text: prompt }] }],
+    generationConfig: { responseMimeType: "application/json" }
+  });
+
+  const response = await result.response.text();
+  console.log("🧾 Étape 1 - Profil principal :", response);
+  return JSON.parse(response);
+}
+
+async function generateInterpretations(formulaire: any) {
+  if (!ai) throw new Error("Gemini API non initialisée");
+  const model = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+  console.log("📥 Données reçues pour interprétation :", {
+    ileDeserte: formulaire.ileDeserte,
+    videos: formulaire.videos
+  });
+
+  let interpretation_ileDeserte = "Interprétation non disponible";
+  let interpretation_videos = "Interprétation non disponible";
+
+  try {
+    const promptIle = `Un·e ado a choisi comme objet pour une île déserte : "${formulaire.ileDeserte || "Aucune sélection"}".
+Explique ce que ce choix révèle sur sa personnalité, ses valeurs ou ses besoins.
+Réponds en une phrase claire.`;
+
+    const resultIle = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: promptIle }] }],
+    });
+
+    interpretation_ileDeserte = (await resultIle.response.text()).trim();
+    console.log("🧠 Réponse brute île déserte :", interpretation_ileDeserte);
+  } catch (error) {
+    console.error("❌ Erreur Gemini île déserte :", error);
+  }
+
+  try {
+    const promptVideos = `Un·e ado a indiqué que ses vidéos préférées sont : "${formulaire.videos || "Aucune sélection"}".
+Explique ce que cela révèle sur sa sensibilité, ses centres d’intérêt ou sa manière d’apprendre.
+Réponds en une phrase claire.`;
+
+    const resultVideos = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: promptVideos }] }],
+    });
+
+    interpretation_videos = (await resultVideos.response.text()).trim();
+    console.log("🎬 Réponse brute vidéos :", interpretation_videos);
+  } catch (error) {
+    console.error("❌ Erreur Gemini vidéos :", error);
+  }
+
+  return {
+    ileDeserte: formulaire.ileDeserte || "Aucune sélection",
+    interpretation_ileDeserte: interpretation_ileDeserte || "Interprétation non disponible",
+    videos: formulaire.videos || "Aucune sélection",
+    interpretation_videos: interpretation_videos || "Interprétation non disponible"
+  };
+}
+
+export async function generateOrientationSuggestions(formulaire: any) {
+  if (!ai) {
+    console.log("🧪 Mode simulé activé");
+    return {
+      analyse_profil: {
+        resume: "Profil simulé",
+        points_forts: ["Créatif", "Curieux"]
+      },
+      recommandations_carrieres: [],
+      conseils_generaux: { recommandations: [] },
+      ileDeserte: "Aucune sélection",
+      interpretation_ileDeserte: "Interprétation non disponible",
+      videos: "Aucune sélection",
+      interpretation_videos: "Interprétation non disponible"
+    };
+  }
+
+  try {
+    const profil = await generateProfilPrincipal(formulaire);
+    const interpretations = await generateInterpretations(formulaire);
+
+    const final = {
+      ...normalizeGeminiResponse(profil),
+      ...interpretations
+    };
+
+    console.log("📦 Réponse fusionnée :", JSON.stringify(final, null, 2));
+    return final;
+  } catch (error) {
+    const message = (error as Error).message || "";
+
+    if (message.includes("model is overloaded") || message.includes("503")) {
+      console.error("❌ Le modèle Gemini est surchargé. Réessaie plus tard.");
+      throw new Error("Le modèle est temporairement indisponible. Réessaie dans quelques instants.");
+    }
+
+    console.error("❌ Erreur Gemini :", error);
+    throw new Error(`Erreur Gemini : ${message}`);
+  }
+}

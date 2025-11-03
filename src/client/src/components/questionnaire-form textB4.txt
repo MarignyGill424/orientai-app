@@ -1,0 +1,1148 @@
+// 📦 Importations en haut du fichier
+// 🧩 React & React Hook Form
+import { useNavigate } from "react-router-dom";
+import React, { useState, useRef } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+// 🔁 React Query
+import { useMutation } from "@tanstack/react-query";
+
+// 🎨 Icônes Lucide
+import {
+  User, Heart, Puzzle, Rocket, Brain, Building2,
+  ArrowLeft, ArrowRight, Sparkles, Eye, Headphones,
+  Hand, TreePine, Monitor, Wrench, Users, Plane, Book
+} from "lucide-react";
+
+// 🧱 UI Components
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select, SelectContent, SelectItem,
+  SelectTrigger, SelectValue
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Card, CardContent } from "@/components/ui/card";
+// 🧩 Form Components
+import { SelectObjet } from "@/components/form/SelectObjet";
+import { SelectVideos } from "@/components/form/SelectVideos";
+import { AppMagiqueInput } from "@/components/form/AppMagiqueInput";
+
+
+// 🔔 Hooks & Utils
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+
+// 📦 Types & Schemas
+import { orientationFormSchema, type OrientationFormData } from "@shared/schema";
+import { type OrientationResults } from "../../../server/services/gemini";
+
+function renderSection(title: string, data: Record<string, any>) {
+  if (!data || typeof data !== "object") return null;
+
+  return (
+    <div className="mt-6">
+      <h3 className="font-semibold text-lg mb-2">{title}</h3>
+      <ul className="list-disc pl-6">
+        {Object.entries(data).map(([key, value]) => (
+          <li key={key}>
+            <strong>{key.replaceAll("_", " ")} :</strong> {value}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+
+// 🧠 Interface des props
+  interface QuestionnaireFormProps {
+  currentSection: number;
+  totalSections: number;
+  onSectionChange: (section: number) => void;
+  onShowResults: (results: OrientationResults, profileId: string) => void;
+  isLoading: boolean;
+  setIsLoading: (loading: boolean) => void;
+  }
+
+
+// 🚀 Composant principal
+export default function QuestionnaireForm({
+  currentSection,
+  totalSections,
+  onSectionChange,
+  onShowResults,
+  isLoading,
+  setIsLoading,
+}: QuestionnaireFormProps) {
+  const { toast } = useToast();
+  const formRef = useRef<HTMLFormElement>(null);
+  const [profil, setProfil] = useState<OrientationResults | null>(null);
+  const navigate = useNavigate();
+  const [step, setStep] = useState<"intro" | "passions" | "aspirations" | "appMagique" | "form">("intro");
+
+
+
+
+  const generateProfileMutation = useMutation({
+  mutationFn: async (data: OrientationFormData) => {
+    console.log("📤 Envoi des données à l'API :", data);
+
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/orientation`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error("Erreur lors de l'envoi du formulaire");
+    }
+    
+	const profil = await response.json(); // ← ici tu reçois la vraie réponse
+    navigate("/resultats", { state: { profil } });
+    return profil; // ✅ tu renvoies le profil pour que onSuccess le reçoive
+  },
+
+  onSuccess: (data) => {
+    console.log("✅ Réponse du serveur :", data);
+    console.log("🧪 Réponse reçue côté frontend :", JSON.stringify(data, null, 2));
+
+    // ✅ Vérification des clés attendues
+    const isProfilComplet =
+      data &&
+      typeof data === "object" &&
+      data.analyse_profil &&
+      Array.isArray(data.recommandations_carrieres) &&
+      typeof data.conseils_generaux === "object";
+
+    console.log("🔍 Vérification des clés :", {
+      analyse_profil: !!data.analyse_profil,
+      recommandations_carrieres: !!data.recommandations_carrieres,
+      conseils_generaux: !!data.conseils_generaux
+    });
+
+    if (!isProfilComplet) {
+      toast({
+        title: "Réponse incomplète",
+        description: "Le serveur a répondu, mais certaines données sont manquantes.",
+        status: "warning",
+        duration: 9000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    // ✅ Stockage du profil
+    setProfil(data);
+
+    const hasCareers = data.recommandations_carrieres.length > 0;
+    const hasProfileText = data.analyse_profil && Object.keys(data.analyse_profil).length > 0;
+
+
+    if (hasCareers && hasProfileText) {
+      onShowResults(data.recommandations_carrieres, data.analyse_profil);
+
+      toast({
+        title: "Profil généré avec succès ! 🎉",
+        description: `Analyse disponible pour ${data.prenom ?? "l'utilisateur"}.`,
+        status: "success",
+        duration: 9000,
+        isClosable: true,
+      });
+    }
+  },
+
+  onError: (error) => {
+    console.error("❌ Erreur côté frontend :", error);
+    toast({
+      title: "Erreur",
+      description: "Impossible de générer ton profil. Réessaie plus tard.",
+      variant: "destructive",
+    });
+  },
+
+  onSettled: () => {
+    setIsLoading(false);
+  }
+});
+
+const {
+  register,
+  handleSubmit,
+  control,
+  setValue,
+  watch,
+  formState: { errors },
+} = useForm<OrientationFormData>({
+  resolver: zodResolver(orientationFormSchema),
+});
+
+
+
+
+// ✅ Ensuite, tu peux déclarer onSubmi (handleSubmit) en dehors
+const onSubmit = async (data: OrientationFormData) => {
+  console.log("✅ Formulaire soumis :", data);
+  console.log("Genre sélectionné :", data.genre);
+  setIsLoading(true);
+  generateProfileMutation.mutate(data);
+};
+
+
+return (
+  <div className="p-6 space-y-6">
+    {/* Étape 1 : intro */}
+    {step === "intro" && (
+      <>
+        <h2>👋 Bienvenue !</h2>
+        <input {...register("prenom")} placeholder="Ton prénom" />
+        <input type="number" {...register("age")} placeholder="Âge" />
+        <input {...register("email")} placeholder="Email" />
+        <select {...register("genre")}>
+          <option value="">Sélectionner...</option>
+          <option value="homme">Homme</option>
+          <option value="femme">Femme</option>
+          <option value="autre">Autre</option>
+        </select>
+        <button onClick={() => setStep("passions")}>Suivant</button>
+      </>
+    )}
+
+    {/* Étape 2 : passions */}
+    {step === "passions" && (
+      <>
+        <h2>🎯 Tes passions</h2>
+        <input {...register("passion1")} placeholder="Passion 1" />
+        <input {...register("passion2")} placeholder="Passion 2" />
+        <input {...register("passion3")} placeholder="Passion 3" />
+        <input {...register("passion4")} placeholder="Passion 4" />
+        <input {...register("passion5")} placeholder="Passion 5" />
+        <input {...register("interet.0")} placeholder="Intérêt 1" />
+        <input {...register("interet.1")} placeholder="Intérêt 2" />
+        <input {...register("objet")} placeholder="Objet fétiche ou inspirant" />
+        <button onClick={() => setStep("aspirations")}>Suivant</button>
+      </>
+    )}
+
+    {/* Étape 3 : aspirations */}
+    {step === "aspirations" && (
+      <>
+        <h2>💡 Tes aspirations</h2>
+        <textarea {...register("aspirations")} placeholder="Ce que tu veux accomplir..." />
+        <input {...register("inspirations")} placeholder="Ce qui t'inspire" />
+        <input {...register("apprentissage")} placeholder="Ce que tu veux apprendre" />
+        <input {...register("apprentissageStyle.0")} placeholder="Style d'apprentissage" />
+        <button onClick={() => setStep("appMagique")}>Suivant</button>
+      </>
+    )}
+
+    {/* Étape 4 : app magique */}
+    {step === "appMagique" && (
+      <>
+        <h2>🧙 Ton app magique</h2>
+        <input {...register("appMagique")} placeholder="Ton app idéale" />
+        <button onClick={() => setStep("form")}>Accéder au formulaire complet</button>
+      </>
+    )}
+
+    {/* Étape finale : formulaire complet */}
+    {step === "form" && (
+      <form onSubmit={handleSubmit(onSubmit)} ref={formRef}>
+        <h2>📋 Formulaire complet</h2>
+
+        {/* 🌍 Environnement & Travail */}
+        <input {...register("mobilite")} placeholder="Localisation / Mobilité" />
+        <input {...register("disponibilite")} placeholder="Disponibilité" />
+        <input {...register("videos")} placeholder="Vidéo marquante" />
+        <input {...register("teletravail")} placeholder="Préférence télétravail" />
+
+        {/* 💡 Compétences & Talents */}
+        <input {...register("competence.0")} placeholder="Compétence 1" />
+        <input {...register("talent.0")} placeholder="Talent 1" />
+
+        {/* 🌈 Valeurs personnelles */}
+        <label>Créativité (1–5)</label>
+        <input type="number" {...register("valeur_creativite")} min={1} max={5} />
+        <label>Autonomie (1–5)</label>
+        <input type="number" {...register("valeur_autonomie")} min={1} max={5} />
+        <input {...register("valeurs_generales.0")} placeholder="Valeur générale 1" />
+
+        {/* 📚 Connaissances & Expériences */}
+        <input {...register("connaissance.0")} placeholder="Connaissance 1" />
+        <input {...register("experience")} placeholder="Expérience marquante" />
+        <textarea {...register("experience_details")} placeholder="Détails de cette expérience" />
+
+        {/* 🧠 Autres */}
+        <textarea {...register("argent")} placeholder="Si l'argent n'était pas un problème..." />
+        <input {...register("citation")} placeholder="Citation ou devise personnelle" />
+
+        <button type="submit">Envoyer</button>
+      </form>
+    )}
+  </div>
+);
+
+
+
+
+// ✅ Et nextSection reste tel quel
+const nextSection = () => {
+  if (currentSection < totalSections) {
+    onSectionChange(currentSection + 1);
+    scrollToSection(currentSection + 1);
+  }
+};
+
+
+
+  const prevSection = () => {
+    if (currentSection > 1) {
+      onSectionChange(currentSection - 1);
+      scrollToSection(currentSection - 1);
+    }
+  };
+
+  const scrollToSection = (section: number) => {
+    const element = document.querySelector(`[data-section="${section}"]`);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+const checkboxOptions = {
+  interet: [
+    { value: "Musique", label: "🎵 Musique" },
+    { value: "Dessin", label: "🎨 Dessin" },
+    { value: "Technologie", label: "💻 Technologie" },
+    { value: "Animaux", label: "🐕 Animaux" },
+    { value: "Lecture", label: "📚 Lecture" },
+    { value: "Jeux vidéo", label: "🎮 Jeux vidéo" },
+    { value: "Écologie", label: "🌱 Écologie" },
+  ],
+  competence: [
+    { value: "Mathématiques", label: "🔢 Mathématiques" },
+    { value: "Expression écrite", label: "✍️ Expression écrite" },
+    { value: "Sciences naturelles", label: "🔬 Sciences naturelles" },
+    { value: "Langues étrangères", label: "🌍 Langues étrangères" },
+    { value: "Informatique", label: "💻 Informatique" },
+    { value: "Communication orale", label: "🗣️ Communication orale" },
+    { value: "Résolution de problèmes", label: "🧠 Résolution de problèmes" },
+    { value: "Créativité artistique", label: "🎨 Créativité artistique" },
+    { value: "Sport", label: "⚽ Sport" },
+  ],
+  talent: [
+    { value: "Communication", label: "Communication" },
+    { value: "Apaiser les conflits", label: "Apaiser les conflits" },
+    { value: "Organiser des sorties", label: "Organiser des sorties" },
+    { value: "Être un bon confident", label: "Être un bon confident" },
+    { value: "Imagination débordante", label: "Imagination débordante" },
+    { value: "Dessiner", label: "Dessiner" },
+    { value: "Écrire", label: "Écrire" },
+    { value: "Musique", label: "Musique" },
+    { value: "Solutions originales", label: "Solutions originales" },
+    { value: "À l'aise avec les mains", label: "À l'aise avec les mains" },
+    { value: "Monter des meubles", label: "Monter des meubles" },
+    { value: "Réparer", label: "Réparer" },
+    { value: "Cuisiner", label: "Cuisiner" },
+    { value: "S'occuper des animaux", label: "S'occuper des animaux" },
+    { value: "Puzzles", label: "Puzzles" },
+    { value: "Comprendre comment les choses fonctionnent", label: "Comprendre le fonctionnement" },
+    { value: "Logique complexe", label: "Logique complexe" },
+  ],
+  motivation: [
+    { value: "Créer", label: "🎨 Créer" },
+    { value: "Aider", label: "🤝 Aider" },
+    { value: "Résoudre", label: "🧩 Résoudre" },
+    { value: "Collaborer", label: "👥 Collaborer" },
+    { value: "Autre", label: "✨ Autre" },
+  ],
+  apprentissageStyle: [
+    { value: "Visuel", label: "Visuel", icon: Eye },
+    { value: "Auditif", label: "Auditif", icon: Headphones },
+    { value: "Kinesthésique", label: "Kinesthésique", icon: Hand },
+  ],
+  environnement: [
+    { value: "En extérieur", label: "En extérieur", icon: TreePine },
+    { value: "Bureau", label: "Bureau", icon: Monitor },
+    { value: "Atelier", label: "Atelier", icon: Wrench },
+    { value: "Public", label: "Public", icon: Users },
+    { value: "Déplacement", label: "Déplacement", icon: Plane },
+  ],
+  valeurs_generales: [
+    { value: "Honnêteté", label: "💎 Honnêteté" },
+    { value: "Respect", label: "🤝 Respect" },
+    { value: "Tolérance", label: "🌈 Tolérance" },
+    { value: "Empathie", label: "💗 Empathie" },
+    { value: "Innovation", label: "🔬 Innovation" },
+    { value: "Respect de l'environnement", label: "🌱 Respect de l'environnement" },
+    { value: "Autre", label: "✨ Autre" },
+  ],
+  connaissance: [
+    { value: "Mathématiques", label: "🔢 Mathématiques" },
+    { value: "Histoire", label: "📚 Histoire" },
+    { value: "Biologie", label: "🧬 Biologie" },
+    { value: "Informatique", label: "💻 Informatique" },
+    { value: "Langues", label: "🌍 Langues" },
+  ],
+};
+
+console.log("🔎 Profil dans le render :", profil);
+console.log("✅ Recommandations :", profil?.recommandations_carrieres);
+
+return (
+    <div className="max-w-4xl mx-auto px-4 pb-24">
+     // <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+	 {form.formState.errors.age && (
+  <p className="text-red-500 text-sm mt-1">
+    {form.formState.errors.age.message}
+  </p>
+)}
+ 
+
+ {/* 👇 C’est ici que tu vas insérer l’affichage du profil JSX*/}
+{profil && (
+  <Card
+    className="shadow-xl border-l-4 border-green-500 transition-all duration-500 mt-12"
+    data-section="résultat"
+  >
+<CardContent className="p-8">
+  <div className="flex items-center mb-6">
+    <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-700 rounded-full flex items-center justify-center mr-4">
+      <Sparkles className="text-white h-6 w-6" />
+    </div>
+    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+      🧠 Profil d’orientation pour {getValues("prenom") || "l'utilisateur"}
+    </h2>
+  </div>
+
+	  {renderSection("📝 Analyse du profil", profil.analyse_profil)}
+      {renderSection("🔍 Hypothèses générales", profil.hypotheses_generales)}
+      {renderSection("💡 Conseils généraux", profil.conseils_generaux)}
+	  
+
+{Array.isArray(profil.recommandations_carrieres) && (
+  <div className="mb-6">
+    <h3 className="font-semibold text-lg mb-2">💼 Recommandations de carrière</h3>
+    <div className="space-y-4">
+      {profil.recommandations_carrieres.map((metier, index) => (
+        <div key={index} className="p-4 border rounded-lg shadow-sm bg-white dark:bg-gray-800">
+          <h4 className="text-xl font-bold mb-2">🔹 {metier.titre}</h4>
+          <p className="mb-2">{metier.description}</p>
+          {metier.pourquoi_innovant_non_traditionnel && (
+            <p className="italic text-sm text-gray-600 mb-2">
+              💡 Pourquoi c’est innovant : {metier.pourquoi_innovant_non_traditionnel}
+            </p>
+          )}
+          {Array.isArray(metier.lien_profil) && (
+            <ul className="list-disc pl-6 mb-2">
+              {metier.lien_profil.map((lien, i) => (
+                <li key={i}>{lien}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+
+    </CardContent>
+  </Card>
+)}
+
+		
+		
+   {/* Section 1: Identity & Context */}
+        <Card 
+          className={`shadow-xl border-l-4 border-primary transition-all duration-500 ${
+            currentSection === 1 ? 'form-section active' : 'form-section'
+          }`}
+          data-section="1"
+        >
+          <CardContent className="p-8">
+            <div className="flex items-center mb-6">
+              <div className="w-12 h-12 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mr-4">
+                <User className="text-white h-6 w-6" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">🎯 Identité & Contexte</h2>
+            </div>
+
+            <div>
+             <Label htmlFor="prenom">Prénom</Label>
+             <Input
+               id="prenom"
+              type="text"
+               placeholder="Ex : Léa"
+               {...register("prenom")}
+             />
+           </div>
+
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <Label htmlFor="age">Âge</Label>
+                <Input
+                  id="age"
+                  type="number"
+                  min="10"
+                  max="25"
+                  placeholder="Ex : 15"
+                  {...register("age", { valueAsNumber: true })}
+                />
+              </div>
+              
+              <div>
+<label htmlFor="genre">Genre</label>
+<select {...register("genre")} id="genre" className="w-full border rounded px-3 py-2">
+  <option value="">Sélectionner...</option>
+  <option value="homme">Homme</option>
+  <option value="femme">Femme</option>
+  <option value="non-binaire">Non-binaire</option>
+  <option value="autre">Autre</option>
+</select>
+              </div>
+              
+              <div>
+                <Label htmlFor="mobilite">Localisation / Mobilité</Label>
+                <Input
+                  id="mobilite"
+                  placeholder="Ex : Paris, Lyon, Marseille…"
+                  {...register("mobilite")}
+                />
+              </div>
+              
+              <div>
+<label htmlFor="disponibilite">Disponibilité</label>
+<select {...register("disponibilite")} id="disponibilite" className="w-full border rounded px-3 py-2">
+  <option value="">Sélectionner...</option>
+  <option value="temps-plein">Temps plein</option>
+  <option value="temps-partiel">Temps partiel</option>
+  <option value="freelance">Freelance</option>
+  <option value="stage">Stage</option>
+  <option value="alternance">Alternance</option>
+</select>
+
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <Label htmlFor="argent">Si l'argent n'était pas un problème, que ferais-tu ?</Label>
+              <Textarea
+                id="argent"
+                rows={3}
+                placeholder="Décris ta journée idéale…"
+                {...register("argent")}
+              />
+            </div>
+
+            <div className="mt-6">
+              <Label htmlFor="citation">Citation ou devise personnelle</Label>
+              <Input
+                id="citation"
+                placeholder="Ex : 'Rien n'est impossible'"
+                {...register("citation")}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+    {/* Section 2: Passions & Interests */}
+        <Card 
+          className={`shadow-xl border-l-4 border-secondary transition-all duration-500 ${
+            currentSection === 2 ? 'form-section active' : 'form-section'
+          }`}
+          data-section="2"
+        >
+          <CardContent className="p-8">
+            <div className="flex items-center mb-6">
+              <div className="w-12 h-12 bg-gradient-to-r from-secondary to-accent rounded-full flex items-center justify-center mr-4">
+                <Heart className="text-white h-6 w-6" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">❤️ Passions & Centres d'intérêt</h2>
+            </div>
+
+            <div className="mb-8">
+              <img 
+                src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=300" 
+                alt="Adolescents explorant leurs passions créatives" 
+                className="w-full h-48 object-cover rounded-lg"
+              />
+            </div>
+
+            <div className="space-y-4 mb-6">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Top 5 de tes passions</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Input placeholder="🎯 Passion 1" {...register("passion1")} />
+                <Input placeholder="🎯 Passion 2" {...register("passion2")} />
+                <Input placeholder="🎯 Passion 3" {...register("passion3")} />
+                <Input placeholder="🎯 Passion 4" {...register("passion4")} />
+                <Input placeholder="🎯 Passion 5" {...register("passion5")} />
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Centres d'intérêt</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {checkboxOptions.interet.map((option) => (
+                  <div key={option.value} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`interet-${option.value}`}
+                      onChange={(checked) => {
+                        const current = getValues("interet") || [];
+                        if (checked) {
+                          setValue("interet", [...current, option.value]);
+                        } else {
+                          setValue("interet", current.filter(v => v !== option.value));
+                        }
+                      }}
+                    />
+                    <Label htmlFor={`interet-${option.value}`} className="text-sm">
+                      {option.label}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+     {/*Remplacé*/}
+
+          </CardContent>
+        </Card>
+
+      <Card>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <SelectObjet
+              value={watch("objet")}
+              onChange={(val) => setValue("objet", val)}
+             error={errors.objet?.message}
+            />
+
+            <SelectVideos
+              value={watch("videos")}
+              onChange={(val) => setValue("videos", val)}
+              error={errors.videos?.message}
+            />
+
+            <AppMagiqueInput
+              value={watch("appMagique")}
+              onChange={(val) => setValue("appMagique", val)}
+              error={errors.appMagique?.message}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+
+     {/* Section 3: Skills & Talents */}
+        <Card 
+          className={`shadow-xl border-l-4 border-accent transition-all duration-500 ${
+            currentSection === 3 ? 'form-section active' : 'form-section'
+          }`}
+          data-section="3"
+        >
+          <CardContent className="p-8">
+            <div className="flex items-center mb-6">
+              <div className="w-12 h-12 bg-gradient-to-r from-accent to-primary rounded-full flex items-center justify-center mr-4">
+                <Puzzle className="text-white h-6 w-6" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">🧩 Compétences & Talents</h2>
+            </div>
+
+            <div className="mb-8">
+              <img 
+                src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=300" 
+                alt="Jeunes développant leurs compétences techniques" 
+                className="w-full h-48 object-cover rounded-lg"
+              />
+            </div>
+
+            <div className="mb-8">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Compétences techniques ou scolaires</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {checkboxOptions.competence.map((option) => (
+                  <div key={option.value} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`competence-${option.value}`}
+                      onChange={(checked) => {
+                        const current = getValues("competence") || [];
+                        if (checked) {
+                          setValue("competence", [...current, option.value]);
+                        } else {
+                          setValue("competence", current.filter(v => v !== option.value));
+                        }
+                      }}
+                    />
+                    <Label htmlFor={`competence-${option.value}`} className="text-sm">
+                      {option.label}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Talents naturels</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {checkboxOptions.talent.map((option) => (
+                  <div key={option.value} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`talent-${option.value}`}
+                      onChange={(checked) => {
+                        const current = getValues("talent") || [];
+                        if (checked) {
+                          setValue("talent", [...current, option.value]);
+                        } else {
+                          setValue("talent", current.filter(v => v !== option.value));
+                        }
+                      }}
+                    />
+                    <Label htmlFor={`talent-${option.value}`} className="text-sm">
+                      {option.label}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+      {/* Section 4: Motivations & Aspirations */}
+        <Card 
+          className={`shadow-xl border-l-4 border-purple-500 transition-all duration-500 ${
+            currentSection === 4 ? 'form-section active' : 'form-section'
+          }`}
+          data-section="4"
+        >
+          <CardContent className="p-8">
+            <div className="flex items-center mb-6">
+              <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mr-4">
+                <Rocket className="text-white h-6 w-6" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">🚀 Motivations & Aspirations</h2>
+            </div>
+
+            <div className="mb-8">
+              <img 
+                src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=300" 
+                alt="Jeunes motivés travaillant ensemble" 
+                className="w-full h-48 object-cover rounded-lg"
+              />
+            </div>
+
+            <div className="mb-8">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Ce qui te motive le plus</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                {checkboxOptions.motivation.map((option) => (
+                  <div key={option.value} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`motivation-${option.value}`}
+                      onChange={(checked) => {
+                        const current = getValues("motivation") || [];
+                        if (checked) {
+                          setValue("motivation", [...current, option.value]);
+                        } else {
+                          setValue("motivation", current.filter(v => v !== option.value));
+                        }
+                      }}
+                    />
+                    <Label htmlFor={`motivation-${option.value}`} className="text-sm">
+                      {option.label}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <Label htmlFor="aspirations">Objectifs ou aspirations</Label>
+                <Textarea
+                  id="aspirations"
+                  rows={3}
+                  placeholder="Raconte-nous tes rêves et ambitions..."
+                  {...register("aspirations")}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="inspirations">Sujets ou personnes qui t'inspirent (et pourquoi)</Label>
+                <Textarea
+                  id="inspirations"
+                  rows={3}
+                  placeholder="Qui sont tes héros ? Qu'est-ce qui te passionne ?"
+                  {...form("inspirations")}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="apprentissage">Ce que tu aimes apprendre en dehors de l'école</Label>
+                <Textarea
+                  id="apprentissage"
+                  rows={3}
+                  placeholder="Tes apprentissages préférés en dehors des cours..."
+                  {...form("apprentissage")}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+
+      {/* Section 5: Learning Style */}
+        <Card 
+          className={`shadow-xl border-l-4 border-indigo-500 transition-all duration-500 ${
+            currentSection === 5 ? 'form-section active' : 'form-section'
+          }`}
+          data-section="5"
+        >
+          <CardContent className="p-8">
+            <div className="flex items-center mb-6">
+              <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full flex items-center justify-center mr-4">
+                <Brain className="text-white h-6 w-6" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">🧠 Style d'apprentissage</h2>
+            </div>
+
+            <div className="mb-8">
+              <img 
+                src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=300" 
+                alt="Différents styles d'apprentissage pour jeunes" 
+                className="w-full h-48 object-cover rounded-lg"
+              />
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Quel est ton style d'apprentissage préféré ?</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {checkboxOptions.apprentissageStyle.map((option) => {
+                  const IconComponent = option.icon;
+                  return (
+                    <Card key={option.value} className="border-2 hover:border-indigo-500 transition-colors cursor-pointer">
+                      <CardContent className="p-6">
+                        <div className="flex flex-col items-center text-center">
+                          <Checkbox
+                            id={`apprentissageStyle-${option.value}`}
+                            className="mb-3"
+                            onChange={(checked) => {
+                              const current = getValues("apprentissageStyle") || [];
+                              if (checked) {
+                                setValue("apprentissageStyle", [...current, option.value]);
+                              } else {
+                                setValue("apprentissageStyle", current.filter(v => v !== option.value));
+                              }
+                            }}
+                          />
+                          <IconComponent className="h-8 w-8 text-indigo-500 mb-2" />
+
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+      {/* Section 6: Work Environment */}
+        <Card 
+          className={`shadow-xl border-l-4 border-teal-500 transition-all duration-500 ${
+            currentSection === 6 ? 'form-section active' : 'form-section'
+          }`}
+          data-section="6"
+        >
+          <CardContent className="p-8">
+            <div className="flex items-center mb-6">
+              <div className="w-12 h-12 bg-gradient-to-r from-teal-500 to-green-500 rounded-full flex items-center justify-center mr-4">
+                <Building2 className="text-white h-6 w-6" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">🏞️ Environnement de travail préféré</h2>
+            </div>
+
+            <div className="mb-8">
+              <img 
+                src="https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=300" 
+                alt="Différents environnements de travail modernes" 
+                className="w-full h-48 object-cover rounded-lg"
+              />
+            </div>
+
+            <div className="mb-8">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Où te sens-tu le plus à l'aise pour travailler ?</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {checkboxOptions.environnement.map((option) => {
+                  const IconComponent = option.icon;
+                  return (
+                    <Card key={option.value} className="border-2 hover:border-teal-500 transition-colors cursor-pointer">
+                      <CardContent className="p-6">
+                        <div className="flex flex-col items-center text-center">
+                          <Checkbox
+                            id={`environnement-${option.value}`}
+                            className="mb-3"
+                            onChange={(checked) => {
+                              const current = getValues("environnement") || [];
+                              if (checked) {
+                                setValue("environnement", [...current, option.value]);
+                              } else {
+                                setValue("environnement", current.filter(v => v !== option.value));
+                              }
+                            }}
+                          />
+                          <IconComponent className="h-8 w-8 text-teal-500 mb-2" />
+                          <Label htmlFor={`environnement-${option.value}`} className="font-medium">
+                            {option.label}
+                          </Label>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
+<label htmlFor="teletravail">Préférence télétravail</label>
+<select {...register("teletravail")} id="teletravail" className="w-full border rounded px-3 py-2">
+  <option value="">Sélectionner...</option>
+  <option value="oui">Oui</option>
+  <option value="non">Non</option>
+  <option value="mixte">Mixte</option>
+</select>
+
+            </div>
+          </CardContent>
+        </Card>
+
+
+     {/* Section 7: Personal Values */}
+        <Card 
+          className={`shadow-xl border-l-4 border-pink-500 transition-all duration-500 ${
+            currentSection === 7 ? 'form-section active' : 'form-section'
+          }`}
+          data-section="7"
+        >
+          <CardContent className="p-8">
+            <div className="flex items-center mb-6">
+              <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-red-500 rounded-full flex items-center justify-center mr-4">
+                <Heart className="text-white h-6 w-6" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">🌱 Valeurs personnelles</h2>
+            </div>
+
+            <div className="mb-8">
+              <img 
+                src="https://images.unsplash.com/photo-1529390079861-591de354faf5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=300" 
+                alt="Jeunes exprimant leurs valeurs personnelles" 
+                className="w-full h-48 object-cover rounded-lg"
+              />
+            </div>
+
+            <div className="mb-8">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Valeurs phares (notation de 1 à 5)</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">5 = Très important, 1 = Pas important</p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[
+                  { key: "valeur_aventure", label: "🌟 Aventure / Exploration" },
+                  { key: "valeur_creativite", label: "🎨 Créativité / Originalité" },
+                  { key: "valeur_securite", label: "🛡️ Sécurité / Stabilité" },
+                  { key: "valeur_aider", label: "🤝 Aider les autres / Altruisme" },
+                  { key: "valeur_autonomie", label: "🦋 Indépendance / Autonomie" },
+                  { key: "valeur_curiosite", label: "🧠 Apprentissage / Curiosité" },
+                  { key: "valeur_collaboration", label: "👥 Travail d'équipe / Collaboration" },
+                  { key: "valeur_reconnaissance", label: "🏆 Reconnaissance / Statut" },
+                  { key: "valeur_equilibre", label: "⚖️ Équilibre vie pro/perso" },
+                  { key: "valeur_defis", label: "🚀 Défis / Surpassement de soi" },
+                  { key: "valeur_justice", label: "⚖️ Justice / Égalité" },
+                  { key: "valeur_nature", label: "🌍 Respect de la nature" },
+                ].map((item) => (
+                  <div key={item.key} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    <span className="font-medium">{item.label}</span>
+                    <RadioGroup
+                      onValueChange={(value) => setValue(item.key as any, parseInt(value))}
+                      className="flex space-x-1"
+                    >
+                      {[1, 2, 3, 4, 5].map((num) => (
+                        <div key={num} className="flex items-center">
+                          <RadioGroupItem value={num.toString()} id={`${item.key}-${num}`} />
+                          <Label htmlFor={`${item.key}-${num}`} className="ml-1 text-sm">{num}</Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Valeurs générales</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {checkboxOptions.valeurs_generales.map((option) => (
+                  <div key={option.value} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`valeurs_generales-${option.value}`}
+                      onChange={(checked) => {
+                        const current = getValues("valeurs_generales") || [];
+                        if (checked) {
+                          setValue("valeurs_generales", [...current, option.value]);
+                        } else {
+                          setValue("valeurs_generales", current.filter(v => v !== option.value));
+                        }
+                      }}
+                    />
+                    <Label htmlFor={`valeurs_generales-${option.value}`} className="text-sm">
+                      {option.label}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+     {/* Section 8: Knowledge & Experience */}
+        <Card 
+          className={`shadow-xl border-l-4 border-indigo-500 transition-all duration-500 ${
+            currentSection === 8 ? 'form-section active' : 'form-section'
+          }`}
+          data-section="8"
+        >
+          <CardContent className="p-8">
+            <div className="flex items-center mb-6">
+              <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center mr-4">
+                <Book className="text-white h-6 w-6" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">📚 Connaissances & Expériences</h2>
+            </div>
+
+            <div className="mb-8">
+              <img 
+                src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=300" 
+                alt="Livres et connaissances scolaires" 
+                className="w-full h-48 object-cover rounded-lg"
+              />
+            </div>
+
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Domaines de connaissance</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {checkboxOptions.connaissance.map((option) => (
+                  <div key={option.value} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`connaissance-${option.value}`}
+                      onChange={(checked) => {
+                        const current = getValues("connaissance") || [];
+                        if (checked) {
+                          setValue("connaissance", [...current, option.value]);
+                        } else {
+                          setValue("connaissance", current.filter(v => v !== option.value));
+                        }
+                      }}
+                    />
+                    <Label htmlFor={`connaissance-${option.value}`} className="text-sm">
+                      {option.label}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <Label>As-tu déjà eu une expérience de travail ou de bénévolat ?</Label>
+                <Select onValueChange={(value) => setValue("experience", value as any)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="-- Choisir --" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Oui">✅ Oui</SelectItem>
+                    <SelectItem value="Non">❌ Non</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="experience_details">Précise ton expérience (si tu en as une)</Label>
+                <Textarea
+                  id="experience_details"
+                  rows={3}
+                  placeholder="Décris tes expériences de travail, stages, bénévolat..."
+                  {...form("experience_details")}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+
+     {/* Section 9: Final Summary */}
+        <Card 
+          className={`shadow-xl gradient-bg text-white transition-all duration-500 ${
+            currentSection === 9 ? 'form-section active' : 'form-section'
+          }`}
+          data-section="9"
+        >
+          <CardContent className="p-8">
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Sparkles className="h-8 w-8" />
+              </div>
+              <h2 className="text-3xl font-bold mb-2">🎉 Prêt(e) pour la magie ?</h2>
+              <p className="text-xl opacity-90">Notre IA va analyser ton profil et te proposer des métiers parfaits pour toi !</p>
+            </div>
+
+            <div className="text-center">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="inline-flex items-center px-12 py-4 bg-white text-primary text-xl font-bold rounded-full hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary border-t-transparent mr-3" />
+                    Analyse en cours...
+                  </>
+                ) : (
+                  <>
+                    <Rocket className="mr-3 h-5 w-5 animate-bounce-gentle" />
+                    Découvrir mes métiers de rêve !
+                    <Sparkles className="ml-3 h-5 w-5" />
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </form>
+
+      {/* Navigation Controls */}
+      <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-4 z-50">
+        <Button
+          onClick={prevSection}
+          disabled={currentSection === 1}
+          variant="secondary"
+          className="flex items-center px-6 py-3 bg-gray-600 text-white rounded-full hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Précédent
+        </Button>
+
+        {currentSection < totalSections && (
+          <Button
+            onClick={nextSection}
+            className="flex items-center px-6 py-3 bg-gradient-to-r from-primary to-secondary text-white rounded-full hover:from-blue-600 hover:to-green-600 transition-colors"
+          >
+            Suivant
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        )}
+      </div>
+    </div> // ← ferme le bloc principal du return
+  );       // ← ferme le return
+}          // ← ferme la fonction

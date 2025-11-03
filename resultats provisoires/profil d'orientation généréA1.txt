@@ -1,0 +1,42 @@
+🎓 Ton profil d’orientation
+import TypewriterText from "../components/TypewriterText"; // en haut du fichier // ...
+🧠 Analyse du profil
+resume : Elowyne, 17 ans, est une jeune femme profondément passionnée par les animaux, et plus particulièrement les chevaux,
+ un thème central dans ses intérêts et aspirations. Elle combine un talent artistique pour le dessin avec une aptitude
+ naturelle à s'occuper des animaux. Ses hobbies pour la danse hip-hop et la K-pop révèlent un intérêt marqué pour l'esthétique
+ visuelle, le mouvement, la performance et la créativité. Ses motivations principales sont claires : 'gagner de l'argent' 
+(notamment pour acheter un cheval) et 's'occuper d'animaux', ce qui témoigne d'une ambition financière concrète liée à sa 
+passion. Sur le plan des valeurs, Elowyne valorise fortement l'autonomie, l'aventure, la créativité, la nature et le respect
+ de l'environnement. Elle est également réceptive aux défis, à la curiosité et à une certaine sécurité. Préférant un 
+environnement 'en extérieur' et un style d'apprentissage 'visuel', elle est prête à s'investir 'temps-plein' et montre une 
+préférence pour les solutions pratiques et innovantes ('outil multifonction', 'appli pour être riche facilement').
+points forts : Passion intense pour les animaux et les chevauxTalents artistiques (dessin) et pratiques (soin des animaux)
+Forte motivation financière et entrepreneurialeGoût pour la créativité, l'esthétique visuelle et la performanceSensibilité
+ écologique et respect de la natureDésir d'autonomie et d'aventurePréférence pour l'apprentissage visuel et le travail en
+ extérieur
+defis potentiels : Concilier la forte aspiration financière avec les métiers animaliers traditionnellement moins rémunérateurs
+.Développer ses compétences numériques et technologiques pour s'orienter vers des voies innovantes.Transformer ses passions 
+en projets professionnels concrets et viables.
+🎯 Métiers suggérés
+Métier sans titre — Ce métier consiste à créer des modèles 3D, des textures et des animations réalistes ou stylisées d'animaux
+ pour des jeux vidéo, des films d'animation, des expériences de réalité virtuelle/augmentée (VR/AR) ou des projets 
+scientifiques. Tu pourrais donner vie à des créatures fantastiques ou recréer fidèlement des chevaux pour des simulations,
+ des publicités ou du divertissement.
+Métier sans titre — En tant qu'éco-entrepreneuse, tu pourrais développer une activité autour du cheval (ex: centre équestre 
+écologique, élevage éthique, tourisme équestre immersif, pension innovante) en y intégrant des pratiques respectueuses de 
+l'environnement et du bien-être animal. En parallèle, tu créerais du contenu digital (vidéos, blogs, réseaux sociaux) pour
+ partager tes valeurs, inspirer une communauté et monétiser ton expertise et ton influence dans le monde équestre durable.
+Métier sans titre — Ce rôle implique d'utiliser des technologies de pointe (capteurs, intelligence artificielle, big data)
+ pour analyser la performance, la biomécanique, la locomotion et la santé des chevaux. Tu pourrais développer des outils 
+ou conseiller sur des solutions innovantes pour optimiser l'entraînement, prévenir les blessures, améliorer la nutrition 
+et le bien-être général des animaux dans les sports équestres, l'élevage ou les centres de rééducation.
+Aucune sélection pour l’île déserte.
+
+Aucune vidéo sélectionnée pour le moment.
+
+📚 Conseils généraux
+🧭 RECOMMANDATIONS
+Aucun conseil spécifique n’a été généré. Tu peux explorer les métiers proposés pour affiner ton projet.
+
+📥 Télécharger mes conseils
+🔁 Recommencer le questionnaire

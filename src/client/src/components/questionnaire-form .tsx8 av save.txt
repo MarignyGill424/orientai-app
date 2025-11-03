@@ -1,0 +1,1527 @@
+// 📦 Importations en haut du fichier
+// 🧩 React & React Hook Form
+import { InterpretationValeursPhares } from "@/components/interpretation/InterpretationValeursPhares";
+import ProfilEtPrompt from "./ProfilEtPrompt";
+
+
+
+import { useNavigate } from "react-router-dom";
+import React, { useState, useRef } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+// 🔁 React Query
+import { useMutation } from "@tanstack/react-query";
+
+// 🎨 Icônes Lucide
+import {
+  User, Heart, Puzzle, Rocket, Brain, Building2,
+  ArrowLeft, ArrowRight, Sparkles, Eye, Headphones,
+  Hand, TreePine, Monitor, Wrench, Users, Plane, Book
+} from "lucide-react";
+import { Gauge } from "lucide-react";
+
+
+// 🧱 UI Components
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
+
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select, SelectContent, SelectItem,
+  SelectTrigger, SelectValue
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Card, CardContent } from "@/components/ui/card";
+
+// 🔔 Hooks & Utils
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+
+// 📦 Types & Schemas
+import { orientationFormSchema, type OrientationFormData } from "@shared/schema";
+import { type OrientationResults } from "../../../server/services/gemini";
+
+function renderSection(title: string, data: Record<string, any>) {
+  if (!data || typeof data !== "object") return null;
+
+  return (
+    <div className="mt-6">
+      <h3 className="font-semibold text-lg mb-2">{title}</h3>
+      <ul className="list-disc pl-6">
+        {Object.entries(data).map(([key, value]) => (
+          <li key={key}>
+            <strong>{key.replaceAll("_", " ")} :</strong>{" "}
+{typeof value === "string" || typeof value === "number"
+  ? value
+  : JSON.stringify(value)}
+
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+
+
+// 🧠 Interface des props
+  interface QuestionnaireFormProps {
+  currentSection: number;
+  totalSections: number;
+  onSectionChange: (section: number) => void;
+  onShowResults: (results: OrientationResults, profileId: string) => void;
+  isLoading: boolean;
+  setIsLoading: (loading: boolean) => void;
+  }
+
+
+// ⬆️ Avant le composant principal
+
+const InterpretationIleDeserte = ({ selected }: { selected: string }) => {
+  const messages: Record<string, string> = {
+    "Carnet et crayon": "Tu as une imagination qui t’emmène loin… même sur une île déserte.",
+    "Livre préféré": "Tu es du genre à explorer, à t’évader, à apprendre. Curieux·se et profond·e.",
+    "Casque audio": "Tu ressens fort, et la musique t’accompagne partout.",
+    "Outil multifonction": "Tu as l’esprit pratique, toujours prêt·e à te débrouiller.",
+    "Objet sentimental": "Tu es attaché·e à ce qui compte pour toi. Ce choix montre une belle sensibilité.",
+    "Console portable": "Tu sais t’amuser, même dans les endroits les plus improbables.",
+    "Application magique": "Tu veux changer les choses, inventer, transformer. Ton imagination est puissante.",
+    "Animal de compagnie": "Tu es du genre à créer des liens forts. Fidèle, affectueux·se, tu ne pars jamais seul·e.",
+    "Nourriture préférée": "Tu sais ce qui te fait plaisir, ce qui te réconforte. Tu vis avec gourmandise et authenticité.",
+    "Miroir ou objet symbolique": "Tu es en quête de sens, peut-être d’identité. Tu réfléchis à qui tu es, et c’est une belle démarche.",
+    "Autre": "Ton choix est unique, comme toi. Il en dit long sur ton monde intérieur… et il mérite d’être exploré.",
+  };
+
+  if (!selected || !messages[selected]) return null;
+
+  return (
+    <div className="mt-4 p-4 bg-indigo-50 border-l-4 border-indigo-400 text-indigo-800 rounded shadow-sm transition-opacity duration-500 ease-in-out">
+      <p className="text-sm italic">{messages[selected]}</p>
+    </div>
+  );
+};
+
+
+
+// 🚀 Composant principal
+export default function QuestionnaireForm({
+  currentSection,
+  totalSections,
+  onSectionChange,
+  onShowResults,
+  isLoading,
+  setIsLoading,
+}: QuestionnaireFormProps) {
+  const { toast } = useToast();
+  const formRef = useRef<HTMLFormElement>(null);
+  const [profil, setProfil] = useState<OrientationResults | null>(null);
+  const navigate = useNavigate();
+
+const [profilData, setProfilData] = useState(null); // ← à l’extérieur
+
+const form = useForm<OrientationFormData>({
+  // resolver: zodResolver(orientationFormSchema),
+defaultValues: {
+  videos: "",
+  appMagique: "",
+  ileDeserte: "",
+  apprentissage: "",
+  aspirations: "",
+  inspirations: "",
+  talents: [],
+  competences: [],
+  environnement: [],
+  valeurs_generales: [],
+  passion1: "",
+  passion2: "",
+  passion3: "",
+  passion4: "",
+  passion5: "",
+  freins: "", 
+  fierte: "",
+  confiance: 5, // valeur par défaut au milieu de l’échelle
+
+
+const location = useLocation();
+const initialData = location.state as OrientationFormData;
+const savedData = JSON.parse(localStorage.getItem("profilTemp") || "{}");
+
+
+const form = useForm<OrientationFormData>({
+  defaultValues: {
+    videos: "",
+    appMagique: "",
+    ileDeserte: "",
+    apprentissage: "",
+    aspirations: "",
+    inspirations: "",
+    talents: [],
+    competences: [],
+    environnement: [],
+    valeurs_generales: [],
+    passion1: "",
+    passion2: "",
+    passion3: "",
+    passion4: "",
+    passion5: "",
+    freins: "", 
+    fierte: "",
+    confiance: 5,
+    ...savedData,
+    ...initialData,
+  },
+});
+
+
+
+
+
+    // ajoute ici tous les champs que tu veux garantir
+  },
+});
+
+
+const generateProfileMutation = useMutation({
+  mutationFn: async (data: OrientationFormData) => {
+    console.log("📤 Envoi des données à l'API !", data);
+
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/orientation`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error("Erreur lors de la génération du profil");
+    }
+
+    return await response.json();
+  },
+});
+
+
+
+
+// ✅ Ensuite, tu peux déclarer handleSubmit en dehors
+
+// 🔧 Fonction utilitaire pour transformer la réponse du backend
+
+function mapResponseToOrientationResults(response: any): OrientationResults {
+  return {
+    analyse_profil: response.analyse_profil ?? {},
+    recommandations_carrieres: response.recommandations_carrieres ?? [],
+    conseils_generaux: response.conseils_generaux ?? {},
+    message_inspirant: response.message_inspirant ?? "",
+    ileDeserte: response.ileDeserte ?? "",
+    interpretation_ileDeserte: response.interpretation_ileDeserte ?? "",
+    videos: response.videos ?? "",
+    interpretation_videos: response.interpretation_videos ?? "",
+    confiance: response.confiance ?? form.getValues("confiance"), // ✅ Ajout ici
+  };
+}
+
+
+
+const handleSubmit = async (data: OrientationFormData) => {
+  setIsLoading(true);
+  setProfilData(data); // ← stocke les réponses pour affichage
+
+  // 🔍 Ajout du log pour vérification
+  console.log("📦 Données envoyées à Gemini :", data);
+
+  generateProfileMutation.mutate(data, {
+    onSuccess: (response) => {
+    console.log("✅ Réponse complète du backend :", response);
+
+      const hasCareers = response.recommandations_carrieres?.length > 0;
+      const hasProfileText =
+        response.analyse_profil &&
+        Object.keys(response.analyse_profil).length > 0;
+
+      if (hasCareers && hasProfileText) {
+       const results = mapResponseToOrientationResults(response);
+       setProfil(results);
+
+
+        // 🔍 Ajout du log pour vérifier la réponse complète
+        console.log("✅ Réponse Gemini :", response);
+
+        navigate("/resultats", {
+          state: { profil: results, source: "profil-temporaire" },
+        });
+
+        onShowResults(results, "profil-temporaire");
+
+        toast({
+          title: "Profil généré avec succès ! 🎉",
+          description: `Analyse disponible pour ${response.prenom ?? "l'utilisateur"}`,
+          status: "success",
+          duration: 9000,
+          isClosable: true,
+        });
+      } else {
+        toast({
+          title: "Profil incomplet",
+          description: "La réponse de Gemini ne contient pas assez d'informations.",
+          status: "warning",
+          duration: 6000,
+          isClosable: true,
+        });
+      }
+
+      setIsLoading(false);
+    },
+
+    onError: (error) => {
+      console.error("❌ Erreur côté frontend :", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de générer ton profil. Réessaie plus tard.",
+        status: "error",
+        duration: 6000,
+        isClosable: true,
+      });
+      setIsLoading(false);
+    },
+
+    onSettled: () => {
+      setIsLoading(false);
+    },
+  });
+};
+
+
+
+// ✅ Et nextSection reste tel quel
+const nextSection = () => {
+  if (currentSection < totalSections) {
+    onSectionChange(currentSection + 1);
+    scrollToSection(currentSection + 1);
+  }
+};
+
+
+
+  const prevSection = () => {
+    if (currentSection > 1) {
+      onSectionChange(currentSection - 1);
+      scrollToSection(currentSection - 1);
+    }
+  };
+
+  const scrollToSection = (section: number) => {
+    const element = document.querySelector(`[data-section="${section}"]`);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+const checkboxOptions = {
+  interet: [
+    { value: "Musique", label: "🎵 Musique" },
+    { value: "Dessin", label: "🎨 Dessin" },
+    { value: "Technologie", label: "💻 Technologie" },
+    { value: "Animaux", label: "🐕 Animaux" },
+    { value: "Lecture", label: "📚 Lecture" },
+    { value: "Jeux vidéo", label: "🎮 Jeux vidéo" },
+    { value: "Écologie", label: "🌱 Écologie" },
+  ],
+  competence: [
+    { value: "Mathématiques", label: "🔢 Mathématiques" },
+    { value: "Expression écrite", label: "✍️ Expression écrite" },
+    { value: "Sciences naturelles", label: "🔬 Sciences naturelles" },
+    { value: "Langues étrangères", label: "🌍 Langues étrangères" },
+    { value: "Informatique", label: "💻 Informatique" },
+    { value: "Communication orale", label: "🗣️ Communication orale" },
+    { value: "Résolution de problèmes", label: "🧠 Résolution de problèmes" },
+    { value: "Créativité artistique", label: "🎨 Créativité artistique" },
+    { value: "Sport", label: "⚽ Sport" },
+  ],
+  talent: [
+    { value: "Communication", label: "Communication" },
+    { value: "Apaiser les conflits", label: "Apaiser les conflits" },
+    { value: "Organiser des sorties", label: "Organiser des sorties" },
+    { value: "Être un bon confident", label: "Être un bon confident" },
+    { value: "Imagination débordante", label: "Imagination débordante" },
+    { value: "Dessiner", label: "Dessiner" },
+    { value: "Écrire", label: "Écrire" },
+    { value: "Musique", label: "Musique" },
+    { value: "Solutions originales", label: "Solutions originales" },
+    { value: "À l'aise avec les mains", label: "À l'aise avec les mains" },
+    { value: "Monter des meubles", label: "Monter des meubles" },
+    { value: "Réparer", label: "Réparer" },
+    { value: "Cuisiner", label: "Cuisiner" },
+    { value: "S'occuper des animaux", label: "S'occuper des animaux" },
+    { value: "Puzzles", label: "Puzzles" },
+    { value: "Comprendre comment les choses fonctionnent", label: "Comprendre le fonctionnement" },
+    { value: "Logique complexe", label: "Logique complexe" },
+  ],
+  motivation: [
+    { value: "Créer", label: "🎨 Créer" },
+    { value: "Aider", label: "🤝 Aider" },
+    { value: "Résoudre", label: "🧩 Résoudre" },
+    { value: "Collaborer", label: "👥 Collaborer" },
+    { value: "Autre", label: "✨ Autre" },
+  ],
+  apprentissageStyle: [
+    { value: "Visuel", label: "Visuel", icon: Eye },
+    { value: "Auditif", label: "Auditif", icon: Headphones },
+    { value: "Kinesthésique", label: "Kinesthésique", icon: Hand },
+  ],
+  environnement: [
+    { value: "En extérieur", label: "En extérieur", icon: TreePine },
+    { value: "Bureau", label: "Bureau", icon: Monitor },
+    { value: "Atelier", label: "Atelier", icon: Wrench },
+    { value: "Public", label: "Public", icon: Users },
+    { value: "Déplacement", label: "Déplacement", icon: Plane },
+  ],
+  valeurs_generales: [
+    { value: "Honnêteté", label: "💎 Honnêteté" },
+    { value: "Respect", label: "🤝 Respect" },
+    { value: "Tolérance", label: "🌈 Tolérance" },
+    { value: "Empathie", label: "💗 Empathie" },
+    { value: "Innovation", label: "🔬 Innovation" },
+    { value: "Respect de l'environnement", label: "🌱 Respect de l'environnement" },
+    { value: "Autre", label: "✨ Autre" },
+  ],
+  connaissance: [
+    { value: "Mathématiques", label: "🔢 Mathématiques" },
+    { value: "Histoire", label: "📚 Histoire" },
+    { value: "Biologie", label: "🧬 Biologie" },
+    { value: "Informatique", label: "💻 Informatique" },
+    { value: "Langues", label: "🌍 Langues" },
+  ],
+};
+
+// console.log("🔎 Profil dans le render :", profil);
+// console.log("✅ Recommandations :", profil?.recommandations_carrieres);
+
+return (
+    <div className="max-w-4xl mx-auto px-4 pb-24">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+	 {form.formState.errors.age && (
+  <p className="text-red-500 text-sm mt-1">
+    {form.formState.errors.age.message}
+  </p>
+)}
+ 
+
+
+ {/* 👇 C’est ici que tu vas insérer l’affichage du profil JSX*/}
+{profil && (
+  <Card
+    className="shadow-xl border-l-4 border-green-500 transition-all duration-500 mt-12"
+    data-section="résultat"
+  >
+<CardContent className="p-8">
+  <div className="flex items-center mb-6">
+    <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-700 rounded-full flex items-center justify-center mr-4">
+      <Sparkles className="text-white h-6 w-6" />
+    </div>
+    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+      🧠 Profil d’orientation pour {form.getValues("prenom") || "l'utilisateur"}
+    </h2>
+  </div>
+
+	  {renderSection("📝 Analyse du profil", profil.analyse_profil)}
+      {renderSection("🔍 Hypothèses générales", profil.hypotheses_generales)}
+      {renderSection("💡 Conseils généraux", profil.conseils_generaux)}
+	  
+
+{Array.isArray(profil.recommandations_carrieres) && (
+  <div className="mb-6">
+    <h3 className="font-semibold text-lg mb-2">💼 Recommandations de carrière</h3>
+    <div className="space-y-4">
+      {profil.recommandations_carrieres.map((metier, index) => (
+        <div key={index} className="p-4 border rounded-lg shadow-sm bg-white dark:bg-gray-800">
+          <h4 className="text-xl font-bold mb-2">🔹 {metier.titre}</h4>
+          <p className="mb-2">{metier.description}</p>
+          {metier.pourquoi_innovant_non_traditionnel && (
+            <p className="italic text-sm text-gray-600 mb-2">
+              💡 Pourquoi c’est innovant : {metier.pourquoi_innovant_non_traditionnel}
+            </p>
+          )}
+          {Array.isArray(metier.lien_profil) && (
+            <ul className="list-disc pl-6 mb-2">
+              {metier.lien_profil.map((lien, i) => (
+                <li key={i}>{lien}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+
+    </CardContent>
+  </Card>
+)}
+
+		
+		
+        {/* Section 1: Identity & Context */}
+        <Card 
+          className={`shadow-xl border-l-4 border-primary transition-all duration-500 ${
+            currentSection === 1 ? 'form-section active' : 'form-section'
+          }`}
+          data-section="1"
+        >
+          <CardContent className="p-8">
+            <div className="flex items-center mb-6">
+              <div className="w-12 h-12 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mr-4">
+                <User className="text-white h-6 w-6" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">🎯 Identité & Contexte</h2>
+            </div>
+
+            <div>
+             <Label htmlFor="prenom">Prénom</Label>
+             <Input
+               id="prenom"
+              type="text"
+               placeholder="Ex : Léa"
+               {...form.register("prenom")}
+  
+           />
+           </div>
+
+
+             <div className="space-y-4">
+         
+              <div>
+                <Label htmlFor="age">Âge</Label>
+                <Input
+                  id="age"
+                  type="number"
+                  min="10"
+                  max="25"
+                  placeholder="Ex : 15"
+                  {...form.register("age", { valueAsNumber: true })}
+                />
+              </div>
+              
+<div>
+  <label htmlFor="genre">Genre</label>
+  <select {...form.register("genre")} id="genre" className="w-full border rounded px-3 py-2">
+    <option value="">Sélectionner...</option>
+    <option value="homme">Homme</option>
+    <option value="femme">Femme</option>
+    <option value="non-binaire">Non-binaire</option>
+    <option value="autre">Autre</option>
+  </select>
+</div>
+
+              
+              <div>
+                <Label htmlFor="mobilite">Localisation / Mobilité</Label>
+                <Input
+                  id="mobilite"
+                  placeholder="Ex : Paris, Lyon, Marseille…"
+                  {...form.register("mobilite")}
+                />
+              </div>
+              
+              <div>
+<label htmlFor="disponibilite">Disponibilité</label>
+<select {...form.register("disponibilite")} id="disponibilite" className="w-full border rounded px-3 py-2">
+  <option value="">Sélectionner...</option>
+  <option value="temps-plein">Temps plein</option>
+  <option value="temps-partiel">Temps partiel</option>
+  <option value="freelance">Freelance</option>
+  <option value="stage">Stage</option>
+  <option value="alternance">Alternance</option>
+</select>
+
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <Label htmlFor="argent">Si l'argent n'était pas un problème, que ferais-tu ?</Label>
+              <Textarea
+                id="argent"
+                rows={3}
+                placeholder="Décris ta journée idéale…"
+                {...form.register("argent")}
+              />
+            </div>
+
+            <div className="mt-6">
+              <Label htmlFor="citation">Citation ou devise personnelle</Label>
+              <Input
+                id="citation"
+                placeholder="Ex : 'Rien n'est impossible'"
+                {...form.register("citation")}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+
+        {/* Section 2: Passions & Interests */}
+        <Card 
+          className={`shadow-xl border-l-4 border-secondary transition-all duration-500 ${
+            currentSection === 2 ? 'form-section active' : 'form-section'
+          }`}
+          data-section="2"
+        >
+          <CardContent className="p-8">
+            <div className="flex items-center mb-6">
+              <div className="w-12 h-12 bg-gradient-to-r from-secondary to-accent rounded-full flex items-center justify-center mr-4">
+                <Heart className="text-white h-6 w-6" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">❤️ Passions & Centres d'intérêt</h2>
+            </div>
+
+            <div className="mb-8">
+              <img 
+                src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=300" 
+                alt="Adolescents explorant leurs passions créatives" 
+                className="w-full h-48 object-cover rounded-lg"
+              />
+            </div>
+
+            <div className="space-y-4 mb-6">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Top 5 de tes passions</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Input placeholder="🎯 Passion 1" {...form.register("passion1")} />
+                <Input placeholder="🎯 Passion 2" {...form.register("passion2")} />
+                <Input placeholder="🎯 Passion 3" {...form.register("passion3")} />
+                <Input placeholder="🎯 Passion 4" {...form.register("passion4")} />
+                <Input placeholder="🎯 Passion 5" {...form.register("passion5")} />
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Centres d'intérêt</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+
+<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+  {checkboxOptions.interet.map((option) => (
+    <div key={option.value} className="flex items-center">
+      <input
+        type="checkbox"
+        value={option.value}
+        {...form.register("interet")}
+        id={`interet-${option.value}`}
+        className="form-checkbox h-5 w-5 text-primary"
+      />
+      <label htmlFor={`interet-${option.value}`} className="ml-2">
+        {option.label}
+      </label>
+    </div>
+  ))}
+</div>
+
+
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+<div className="my-6">
+  <hr className="border-t border-gray-300" />
+</div>
+
+
+
+
+
+<div className="my-6">
+  <hr className="border-t border-gray-300" />
+</div>
+
+<div className="mb-6">
+  <label htmlFor="ileDeserte" className="block font-medium mb-2">
+    🏝️ Si tu devais aller sur une île déserte, quel objet emporterais-tu ?
+  </label>
+
+  <select {...form.register("ileDeserte")} id="ileDeserte" className="w-full border rounded px-3 py-2">
+    <option value="">Sélectionner...</option>
+    <option value="Carnet et crayon">📝 Carnet et crayon</option>
+    <option value="Livre préféré">📖 Livre préféré</option>
+    <option value="Casque audio">🎧 Casque audio</option>
+    <option value="Outil multifonction">🔨 Outil multifonction</option>
+    <option value="Objet sentimental">🧸 Objet sentimental</option>
+    <option value="Console portable">🎮 Console portable</option>
+    <option value="Application magique">🪄 Application magique</option>
+    <option value="Animal de compagnie">🐕 Animal de compagnie</option>
+    <option value="Nourriture préférée">🍫 Nourriture préférée</option>
+    <option value="Miroir ou objet symbolique">🪞 Miroir ou objet symbolique</option>
+    <option value="Autre">🤔 Autre</option>
+  </select>
+
+<InterpretationIleDeserte selected={form.watch("ileDeserte")} />
+
+
+  {form.formState.errors.ileDeserte && (
+    <p className="text-red-500 text-sm mt-1">
+      {form.formState.errors.ileDeserte.message}
+    </p>
+  )}
+</div>
+
+<div className="my-6">
+  <hr className="border-t border-gray-300" />
+</div>
+
+
+{/*  SUPPRIME   
+              <div>
+                <Label>Genre de vidéos préférées</Label>
+                <Select onValueChange={(value) => form.setValue("videos", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="-- Choisir --" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Tutoriels">📚 Tutoriels</SelectItem>
+                    <SelectItem value="Reportages">📺 Reportages</SelectItem>
+                    <SelectItem value="Défis">🏆 Défis</SelectItem>
+                    <SelectItem value="Jeux vidéo">🎮 Jeux vidéo</SelectItem>
+                    <SelectItem value="Musique">🎵 Musique</SelectItem>
+                    <SelectItem value="Autre">✨ Autre</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+*/}
+
+<div className="mb-4 mt-6">
+  <label htmlFor="videos" className="block font-medium mb-1">
+    🎥 Tes vidéos préférées
+  </label>
+
+  <select {...form.register("videos")} id="videos" className="w-full border rounded px-3 py-2 mt-2">
+    <option value="">Sélectionner...</option>
+    <option value="Humour">😂 Humour</option>
+    <option value="Sport">⚽ Sport</option>
+    <option value="Musique">🎵 Musique</option>
+    <option value="Science">🔬 Science</option>
+    <option value="Séries">📺 Séries</option>
+    <option value="Films">🎬 Films</option>
+    <option value="Autre">🤔 Autre</option>
+  </select>
+
+  {form.formState.errors.videos && (
+    <p className="text-red-500 text-sm mt-1">
+      {form.formState.errors.videos.message}
+    </p>
+  )}
+</div>
+
+<div className="my-6">
+  <hr className="border-t border-gray-300" />
+</div>
+
+
+              <div>
+                <Label htmlFor="appMagique">🧞‍ Si tu pouvais fabriquer une application magique ce serait laquelle? </Label>
+                <Input
+                  id="appMagique"
+                  placeholder="Décris ton app idéale..."
+                  {...form.register("appMagique")}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+<div className="my-6">
+  <hr className="border-t border-gray-300" />
+</div>
+
+
+{/* Section 3: Skills & Talents */}
+<Card 
+  className={`shadow-xl border-l-4 border-accent transition-all duration-500 ${
+    currentSection === 3 ? 'form-section active' : 'form-section'
+  }`}
+  data-section="3"
+>
+  <CardContent className="p-8">
+    <div className="flex items-center mb-6">
+      <div className="w-12 h-12 bg-gradient-to-r from-accent to-primary rounded-full flex items-center justify-center mr-4">
+        <Puzzle className="text-white h-6 w-6" />
+      </div>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">🧩 Compétences & Talents</h2>
+    </div>
+
+    <div className="mb-8">
+      <img 
+        src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=300" 
+        alt="Jeunes développant leurs compétences techniques" 
+        className="w-full h-48 object-cover rounded-lg"
+      />
+    </div>
+
+    <div className="mb-8">
+      <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Compétences techniques ou scolaires</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        {checkboxOptions.competence.map((option) => (
+          <div key={option.value} className="flex items-center">
+            <input
+              type="checkbox"
+              value={option.value}
+              {...form.register("competences")}
+              id={`competences-${option.value}`}
+              className="form-checkbox h-5 w-5 text-primary"
+            />
+            <label htmlFor={`competences-${option.value}`} className="ml-2">
+              {option.label}
+            </label>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div>
+      <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Talents naturels</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        {checkboxOptions.talent.map((option) => (
+          <div key={option.value} className="flex items-center">
+            <input
+              type="checkbox"
+              value={option.value}
+              {...form.register("talents")}
+              id={`talents-${option.value}`}
+              className="form-checkbox h-5 w-5 text-primary"
+            />
+            <label htmlFor={`talents-${option.value}`} className="ml-2">
+              {option.label}
+            </label>
+          </div>
+        ))}
+      </div>
+    </div>
+  </CardContent>
+</Card>
+
+
+
+{/* Section 4: Motivations & Aspirations */}
+<Card 
+  className={`shadow-xl border-l-4 border-purple-500 transition-all duration-500 ${
+    currentSection === 4 ? 'form-section active' : 'form-section'
+  }`}
+  data-section="4"
+>
+  <CardContent className="p-8">
+    <div className="flex items-center mb-6">
+      <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mr-4">
+        <Rocket className="text-white h-6 w-6" />
+      </div>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">🚀 Motivations & Aspirations</h2>
+    </div>
+
+    <div className="mb-8">
+      <img 
+        src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=300" 
+        alt="Jeunes motivés travaillant ensemble" 
+        className="w-full h-48 object-cover rounded-lg"
+      />
+    </div>
+
+    <div className="mb-8">
+      <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Ce qui te motive le plus</h3>
+      {/* Tu peux ajouter ici une grille de motivations si tu veux */}
+    </div>
+
+    <div className="space-y-6">
+      <div>
+        <Label htmlFor="aspirations">Objectifs ou aspirations</Label>
+        <Textarea
+          id="aspirations"
+          rows={3}
+          placeholder="Raconte-nous tes rêves et ambitions..."
+          {...form.register("aspirations")}
+        />
+      </div>
+
+<div>
+  <Label htmlFor="confiance">🧭 Ton niveau de confiance</Label>
+  <Controller
+    control={form.control}
+    name="confiance"
+    render={({ field }) => (
+      <div className="flex items-center space-x-4 mt-2">
+        <Slider
+          min={1}
+          max={10}
+          step={1}
+          value={[field.value || 5]}
+          onValueChange={(val) => field.onChange(val[0])}
+        />
+        <span className="text-sm font-medium text-gray-700">{field.value}/10</span>
+      </div>
+    )}
+  />
+</div>
+
+
+<div>
+  <Label htmlFor="inspirations">Sujets ou personnes qui t'inspirent (et pourquoi)</Label>
+  <Textarea
+    id="inspirations"
+    rows={3}
+    placeholder="Qui sont tes héros ? Qu'est-ce qui te passionne ?"
+    {...form.register("inspirations")}
+  />
+</div>
+
+
+      <div>
+        <Label htmlFor="apprentissage">Ce que tu aimes apprendre en dehors de l'école</Label>
+        <Textarea
+          id="apprentissage"
+          rows={3}
+          placeholder="Tes apprentissages préférés en dehors des cours..."
+          {...form.register("apprentissage")}
+        />
+      </div>
+    </div>
+  </CardContent>
+</Card>
+
+{/* Section 4.2: Freins & Doutes */}
+
+<Card 
+  className={`shadow-xl border-l-4 border-yellow-500 transition-all duration-500 ${
+    currentSection === 6 ? 'form-section active' : 'form-section'
+  }`}
+  data-section="6"
+>
+  <CardContent className="p-8">
+    <div className="flex items-center mb-6">
+      <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center mr-4">
+        <Brain className="text-white h-6 w-6" />
+      </div>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">🧱 Freins & Doutes</h2>
+    </div>
+
+    <div className="mb-8">
+      <img 
+        src="https://images.unsplash.com/photo-1520975922203-6c4c1b1d3c5b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=300" 
+        alt="Jeune en réflexion face à ses doutes" 
+        className="w-full h-48 object-cover rounded-lg"
+      />
+    </div>
+
+    <div className="space-y-6">
+      <Label htmlFor="freins">Qu’est-ce qui pourrait t’empêcher d’avancer vers tes rêves ?</Label>
+      <Textarea
+        id="freins"
+        rows={3}
+        placeholder="Ex : manque de confiance, peur de l’échec, pas d’idées, etc."
+        {...form.register("freins")}
+      />
+    </div>
+  </CardContent>
+</Card>
+
+
+
+{/* Section 4.3: Petites victoires */}
+<Card 
+  className={`shadow-xl border-l-4 border-green-500 transition-all duration-500 ${
+    currentSection === 7 ? 'form-section active' : 'form-section'
+  }`}
+  data-section="7"
+>
+  <CardContent className="p-8">
+    <div className="flex items-center mb-6">
+      <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-green-600 rounded-full flex items-center justify-center mr-4">
+        <Sparkles className="text-white h-6 w-6" />
+      </div>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">🌟 Petites victoires</h2>
+    </div>
+
+    <div className="mb-8">
+      <img 
+        src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=300" 
+        alt="Moment de fierté ou de réussite personnelle" 
+        className="w-full h-48 object-cover rounded-lg"
+      />
+    </div>
+
+    <div className="space-y-6">
+      <Label htmlFor="fierte">Parle-moi d’un moment où tu as été fière de toi</Label>
+      <Textarea
+        id="fierte"
+        rows={3}
+        placeholder="Même une petite chose !"
+        {...form.register("fierte")}
+      />
+
+      {/* Message motivant si le champ est rempli */}
+      {form.watch("fierte") && form.watch("fierte").length > 10 && (
+        <div className="mt-4 p-4 bg-green-50 border-l-4 border-green-400 text-green-800 rounded shadow-sm transition-opacity duration-500 ease-in-out">
+          <p className="text-sm italic">
+            🌱 Ce souvenir montre que tu es capable de belles choses. Garde-le en tête quand tu doutes.
+          </p>
+        </div>
+      )}
+    </div>
+  </CardContent>
+</Card>
+
+
+
+{/*
+  Section 4.4: Echelle de confiance (Input)
+*/}
+
+<div className="space-y-6 mt-8">
+  <Label htmlFor="confiance">🔍 Sur une échelle de 1 à 10, à quel point crois-tu en ton potentiel ?</Label>
+  <Input
+    id="confiance"
+    type="number"
+    min={1}
+    max={10}
+    step={1}
+    {...form.register("confiance", { valueAsNumber: true })}
+    className="w-24"
+  />
+</div>
+
+
+{/*
+  Section 4.5 & 4.6: Slider + Gauge
+*/}
+
+<Card 
+  className={`shadow-xl border-l-4 border-purple-500 transition-all duration-500 ${
+    currentSection === 8 ? 'form-section active' : 'form-section'
+  }`}
+  data-section="8"
+>
+  <CardContent className="p-8">
+    <div className="flex items-center mb-6">
+      <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full flex items-center justify-center mr-4">
+        <Gauge className="text-white h-6 w-6" />
+      </div>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">📊 Échelle de confiance</h2>
+    </div>
+
+    <div className="mb-8">
+      <img 
+        src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=300" 
+        alt="Échelle de confiance personnelle" 
+        className="w-full h-48 object-cover rounded-lg"
+      />
+      <figcaption className="text-sm text-gray-500 italic mt-2 text-center">
+        📊 Comment tu te sens face à ton avenir ?
+      </figcaption>
+    </div>
+
+    <div className="space-y-4">
+      <Label htmlFor="confiance">Sur une échelle de 1 à 10, à quel point crois-tu en ton potentiel ?</Label>
+      <Controller
+        control={form.control}
+        name="confiance"
+        render={({ field }) => (
+          <div className="flex items-center space-x-4">
+            <Slider
+              min={1}
+              max={10}
+              step={1}
+              value={[field.value || 5]}
+              onValueChange={(val) => field.onChange(val[0])}
+              className="w-full"
+            />
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{field.value}</span>
+          </div>
+        )}
+      />
+    </div>
+  </CardContent>
+</Card>
+
+
+
+
+        {/* Section 5: Learning Style */}
+        <Card 
+          className={`shadow-xl border-l-4 border-indigo-500 transition-all duration-500 ${
+            currentSection === 5 ? 'form-section active' : 'form-section'
+          }`}
+          data-section="5"
+        >
+          <CardContent className="p-8">
+            <div className="flex items-center mb-6">
+              <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full flex items-center justify-center mr-4">
+                <Brain className="text-white h-6 w-6" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">🧠 Style d'apprentissage</h2>
+            </div>
+
+            <div className="mb-8">
+              <img 
+                src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=300" 
+                alt="Différents styles d'apprentissage pour jeunes" 
+                className="w-full h-48 object-cover rounded-lg"
+              />
+            </div>
+
+<div className="mb-8">
+  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
+    🧠 Quel est ton style d’apprentissage préféré ?
+  </h3>
+
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+    {checkboxOptions.apprentissageStyle.map((option) => {
+      const IconComponent = option.icon;
+      const id = `apprentissageStyle-${option.value}`;
+      return (
+        <div key={option.value} className="flex items-center border rounded-lg p-4 hover:border-indigo-500 transition-colors">
+          <input
+            type="checkbox"
+            id={id}
+            value={option.value}
+            {...form.register("apprentissageStyle")}
+            className="form-checkbox h-5 w-5 text-indigo-500 mr-3"
+          />
+          <label htmlFor={id} className="flex items-center space-x-2 cursor-pointer">
+            <IconComponent className="h-6 w-6 text-indigo-500" />
+            <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
+              {option.label}
+            </span>
+          </label>
+        </div>
+      );
+    })}
+  </div>
+</div>
+
+
+
+
+          </CardContent>
+        </Card>
+
+        {/* Section 6: Work Environment */}
+ 
+<Card
+  className={`shadow-xl border-l-4 border-teal-500 transition-all duration-500 ${
+    currentSection === 6 ? 'form-section active' : 'form-section'
+  }`}
+  data-section="6"
+>
+  <CardContent className="p-8">
+    {/* Titre et icône */}
+    <div className="flex items-center mb-6">
+      <div className="w-12 h-12 bg-gradient-to-r from-teal-500 to-green-500 rounded-full flex items-center justify-center mr-4">
+        <Building2 className="text-white h-6 w-6" />
+      </div>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">🏞️ Environnement de travail préféré</h2>
+    </div>
+
+    {/* Image */}
+    <div className="mb-8">
+      <img
+        src="https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=300"
+        alt="Différents environnements de travail modernes"
+        className="w-full h-48 object-cover rounded-lg"
+      />
+    </div>
+
+    {/* Choix d’environnement */}
+    <div className="mb-10">
+      <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
+        Où te sens-tu le plus à l’aise pour travailler ?
+      </h3>
+      <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+        Tu peux cocher plusieurs environnements si tu hésites ou aimes varier.
+      </p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        {checkboxOptions.environnement.map((option) => {
+          const IconComponent = option.icon;
+          const id = `environnement-${option.value}`;
+          return (
+            <div key={option.value} className="flex items-center border rounded-lg p-4 hover:border-teal-500 transition-colors">
+              <input
+                type="checkbox"
+                id={id}
+                value={option.value}
+                {...form.register("environnement")}
+                className="form-checkbox h-5 w-5 text-teal-500 mr-3"
+              />
+              <label htmlFor={id} className="flex items-center space-x-2 cursor-pointer">
+                <IconComponent className="h-6 w-6 text-teal-500" />
+                <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                  {option.label}
+                </span>
+              </label>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+
+    {/* Télétravail */}
+    <div className="mb-4">
+      <label htmlFor="teletravail" className="block font-medium mb-2">
+        💻 Préférence télétravail
+      </label>
+      <select
+        {...form.register("teletravail")}
+        id="teletravail"
+        className="w-full border rounded px-3 py-2"
+      >
+        <option value="">Sélectionner...</option>
+        <option value="oui">Oui</option>
+        <option value="non">Non</option>
+        <option value="mixte">Mixte</option>
+      </select>
+    </div>
+  </CardContent>
+</Card>
+
+
+
+{/* Section 7: Personal Values */}
+<Card
+  className={`shadow-xl border-l-4 border-pink-500 transition-all duration-500 ${
+    currentSection === 7 ? 'form-section active' : 'form-section'
+  }`}
+  data-section="7"
+>
+  <CardContent className="p-8">
+    {/* Titre et icône */}
+    <div className="flex items-center mb-6">
+      <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-red-500 rounded-full flex items-center justify-center mr-4">
+        <Heart className="text-white h-6 w-6" />
+      </div>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">🌱 Valeurs personnelles</h2>
+    </div>
+
+    {/* Image */}
+    <div className="mb-8">
+      <img
+        src="https://images.unsplash.com/photo-1529390079861-591de354faf5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=300"
+        alt="Jeunes exprimant leurs valeurs personnelles"
+        className="w-full h-48 object-cover rounded-lg"
+      />
+    </div>
+
+    {/* Valeurs phares */}
+    <div className="mb-12">
+      <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
+        Valeurs phares (notation de 1 à 5)
+      </h3>
+      <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+        5 = Très important, 1 = Pas important
+      </p>
+
+      <div className="space-y-4">
+        {[
+          { key: "valeur_aventure", label: "🌟 Aventure / Exploration" },
+          { key: "valeur_creativite", label: "🎨 Créativité / Originalité" },
+          { key: "valeur_securite", label: "🛡️ Sécurité / Stabilité" },
+          { key: "valeur_aider", label: "🤝 Aider les autres / Altruisme" },
+          { key: "valeur_autonomie", label: "🦋 Indépendance / Autonomie" },
+          { key: "valeur_curiosite", label: "🧠 Apprentissage / Curiosité" },
+          { key: "valeur_collaboration", label: "👥 Travail d'équipe / Collaboration" },
+          { key: "valeur_reconnaissance", label: "🏆 Reconnaissance / Statut" },
+          { key: "valeur_equilibre", label: "⚖️ Équilibre vie pro/perso" },
+          { key: "valeur_defis", label: "🚀 Défis / Surpassement de soi" },
+          { key: "valeur_justice", label: "⚖️ Justice / Égalité" },
+          { key: "valeur_nature", label: "🌍 Respect de la nature" },
+        ].map((item) => (
+          <div
+            key={item.key}
+            className="border rounded-lg px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+          >
+            <div className="flex flex-col md:flex-row md:items-center justify-between">
+              <span className="text-base font-medium text-gray-800 dark:text-gray-200 mb-2 md:mb-0">
+                {item.label}
+              </span>
+
+              <div className="flex items-center gap-3">
+                {[1, 2, 3, 4, 5].map((num) => (
+                  <RadioGroupItem
+                    key={num}
+                    label={num.toString()}
+                    value={num.toString()}
+                    name={item.key}
+                    checked={form.watch(item.key)?.toString() === num.toString()}
+                    onChange={(e) => form.setValue(item.key, parseInt(e.target.value))}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <InterpretationValeursPhares
+              keyValeur={item.key}
+              score={parseInt(form.watch(item.key)?.toString() || "0")}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* Valeurs générales */}
+    <div className="mb-4">
+      <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
+        Valeurs générales (cases à cocher)
+      </h3>
+      <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+        Coche les valeurs qui te parlent le plus.
+      </p>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {checkboxOptions.valeurs_generales.map((option) => (
+          <div key={option.value} className="flex items-center">
+            <input
+              type="checkbox"
+              id={`valeurs_generales-${option.value}`}
+              value={option.value}
+              {...form.register("valeurs_generales")}
+              className="form-checkbox h-5 w-5 text-pink-500"
+            />
+            <label
+              htmlFor={`valeurs_generales-${option.value}`}
+              className="ml-2 text-sm text-gray-800 dark:text-gray-200"
+            >
+              {option.label}
+            </label>
+          </div>
+        ))}
+      </div>
+    </div>
+  </CardContent>
+</Card>
+
+
+
+
+
+{/* Section 8: Knowledge & Experience */}
+
+<Card
+  className={`shadow-xl border-l-4 border-indigo-500 transition-all duration-500 ${
+    currentSection === 8 ? 'form-section active' : 'form-section'
+  }`}
+  data-section="8"
+>
+  <CardContent className="p-8">
+    {/* Titre et icône */}
+    <div className="flex items-center mb-6">
+      <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center mr-4">
+        <Book className="text-white h-6 w-6" />
+      </div>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">📚 Connaissances & Expériences</h2>
+    </div>
+
+    {/* Image */}
+    <div className="mb-8">
+      <img
+        src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=300"
+        alt="Livres et connaissances scolaires"
+        className="w-full h-48 object-cover rounded-lg"
+      />
+    </div>
+
+    {/* Domaines de connaissance */}
+    <div className="mb-10">
+      <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
+        Domaines de connaissance
+      </h3>
+      <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+        Coche les domaines que tu connais ou qui t’intéressent.
+      </p>
+
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {checkboxOptions.connaissance.map((option) => {
+          const id = `connaissance-${option.value}`;
+          return (
+            <div key={option.value} className="flex items-center">
+              <input
+                type="checkbox"
+                id={id}
+                value={option.value}
+                {...form.register("connaissance")}
+                className="form-checkbox h-5 w-5 text-indigo-500"
+              />
+              <label
+                htmlFor={id}
+                className="ml-2 text-sm text-gray-800 dark:text-gray-200"
+              >
+                {option.label}
+              </label>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+
+    {/* Intro mentorale */}
+    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+      Et maintenant, parlons de ton expérience sur le terrain…
+    </p>
+
+    {/* Bénévolat */}
+    <div className="mb-4">
+      <label htmlFor="benevolat" className="block font-medium mb-2">
+        🙋‍♀️ As-tu déjà fait du bénévolat ?
+      </label>
+      <select
+        {...form.register("benevolat")}
+        id="benevolat"
+        className="w-full border rounded px-3 py-2"
+      >
+        <option value="">Sélectionner...</option>
+        <option value="Oui">🙌 Oui</option>
+        <option value="Non">🤷‍♂️ Non</option>
+        <option value="Je ne sais pas">🤔 Je ne sais pas</option>
+      </select>
+      {form.formState.errors.benevolat && (
+        <p className="text-red-500 text-sm mt-1">
+          {form.formState.errors.benevolat.message}
+        </p>
+      )}
+    </div>
+
+    {/* Bulle mentorale */}
+    {form.watch("benevolat") && (
+      <div className="mt-4 p-4 bg-indigo-50 border-l-4 border-indigo-400 text-indigo-800 rounded shadow-sm transition-opacity duration-500 ease-in-out">
+        {form.watch("benevolat") === "Oui" && (
+          <p className="text-sm italic">
+            🙌 Bravo pour ton engagement ! Le bénévolat développe des compétences humaines précieuses et montre ton envie d’aider les autres.
+          </p>
+        )}
+        {form.watch("benevolat") === "Non" && (
+          <p className="text-sm italic">
+            🤷‍♂️ Pas de souci ! Il existe plein d’autres façons de contribuer ou de découvrir des domaines qui te passionnent.
+          </p>
+        )}
+        {form.watch("benevolat") === "Je ne sais pas" && (
+          <p className="text-sm italic">
+            🤔 C’est normal d’hésiter. Le bénévolat peut être une belle occasion d’explorer tes valeurs et de rencontrer des personnes inspirantes.
+          </p>
+        )}
+      </div>
+    )}
+  </CardContent>
+</Card>
+
+
+
+
+
+        {/* Section 9: Final Summary */}
+        <Card 
+          className={`shadow-xl gradient-bg text-white transition-all duration-500 ${
+            currentSection === 9 ? 'form-section active' : 'form-section'
+          }`}
+          data-section="9"
+        >
+          <CardContent className="p-8">
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Sparkles className="h-8 w-8" />
+              </div>
+              <h2 className="text-3xl font-bold mb-2">🎉 Prêt(e) pour la magie ?</h2>
+              <p className="text-xl opacity-90">Un peu de patience (1 à 4 minutes), notre IA va analyser ton profil et te proposer des orientations et métiers pour toi !</p>
+            </div>
+
+            <div className="text-center">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="inline-flex items-center px-12 py-4 bg-white text-primary text-xl font-bold rounded-full hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary border-t-transparent mr-3" />
+                    Analyse en cours...
+                  </>
+                ) : (
+                  <>
+                    <Rocket className="mr-3 h-5 w-5 animate-bounce-gentle" />
+                    Découvrir mes métiers de rêve !
+                    <Sparkles className="ml-3 h-5 w-5" />
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </form>
+
+    {profilData && <ProfilEtPrompt data={profilData} />}
+
+
+      {/* Navigation Controls */}
+      <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-4 z-50">
+        <Button
+          onClick={prevSection}
+          disabled={currentSection === 1}
+          variant="secondary"
+          className="flex items-center px-6 py-3 bg-gray-600 text-white rounded-full hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Précédent
+        </Button>
+
+        {currentSection < totalSections && (
+          <Button
+            onClick={nextSection}
+            className="flex items-center px-6 py-3 bg-gradient-to-r from-primary to-secondary text-white rounded-full hover:from-blue-600 hover:to-green-600 transition-colors"
+          >
+            Suivant
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        )}
+      </div>
+
+
+{/* Dialogue Controls: 3 boutons de sauvegarde*/}
+<div className="fixed bottom-0 left-0 right-0 flex flex-col md:flex-row justify-center items-center gap-4 px-4 py-6 bg-white border-t shadow z-40">
+  {/* ✅ Sauvegarder */}
+  <Button
+    variant="outline"
+    onClick={() => {
+      const currentData = form.getValues();
+      localStorage.setItem("profilTemp", JSON.stringify(currentData));
+    }}
+    className="w-full md:w-auto"
+  >
+    ✅ Sauvegarder mes réponses
+  </Button>
+
+  {/* ✏️ Recharger mes réponses */}
+  {Object.keys(savedData).length > 0 && (
+    <Button
+      variant="outline"
+      onClick={() => form.reset(savedData)}
+      className="w-full md:w-auto"
+    >
+      ✏️ Recharger mes réponses
+    </Button>
+  )}
+
+  {/* 🔁 Recommencer à zéro */}
+  <Button
+    variant="destructive"
+    onClick={() => {
+      localStorage.removeItem("profilTemp");
+      form.reset();
+    }}
+    className="w-full md:w-auto"
+  >
+    🔁 Recommencer à zéro
+  </Button>
+</div>
+
+
+
+
+    </div> // ← ferme le bloc principal du return
+  );       // ← ferme le return
+}          // ← ferme la fonction

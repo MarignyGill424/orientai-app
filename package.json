@@ -1,0 +1,30 @@
+{
+  "name": "orientai-app",
+  "private": true,
+  "workspaces": [
+    "src/client",
+    "src/server"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace src/client",
+    "dev:server": "npm run dev --workspace src/server",
+    "start:server": "npm run start --workspace src/server",
+    "start:client": "npm run dev --workspace src/client",
+    "start": "concurrently \"npm run start:server\" \"npm run start:client\"",
+    "lint": "npm run lint --workspace src/client",
+    "build:client": "npm run build --workspace src/client",
+    "build:server": "npm run build --workspace src/server",
+    "build": "npm run build:client && npm run build:server"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "concurrently": "^8.2.2",
+    "ts-node": "^10.9.2",
+    "vite": "^7.1.6"
+  },
+  "dependencies": {
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.3",
+    "react-router-dom": "^7.8.2"
+  }
+}

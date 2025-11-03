@@ -1,0 +1,214 @@
+✅ Serveur OrientAI lancé sur http://localhost:5000
+📥 Données reçues dans /orientation : {
+  videos: 'Sport',
+  appMagique: 'une appli qui me rende riche',
+  ileDeserte: 'Outil multifonction',
+  apprentissage: '',
+  aspirations: "gagner de l'argent et s'occuper d'animaux",
+  inspirations: 'les danseurs coréens de k-pop',
+  talents: [ 'Dessiner', "S'occuper des animaux" ],
+  competences: [ 'Sport' ],
+  environnement: [ 'En extérieur' ],
+  valeurs_generales: [ "Respect de l'environnement" ],
+  passion1: 'animaux',
+  passion2: 'cheval',
+  passion3: 'danse hip hop',
+  passion4: 'k-pop',
+  passion5: 'aquariophilie',
+  prenom: 'Elowyne',
+  age: 18,
+  genre: 'femme',
+  mobilite: 'Paris',
+  disponibilite: 'temps-plein',
+  argent: 'cheter un cheval et faire des concours hippiques',
+  citation: '',
+  interet: [ 'Animaux' ],
+  apprentissageStyle: [ 'Visuel' ],
+  teletravail: '',
+  connaissance: false,
+  benevolat: 'Non',
+  valeur_aventure: 3,
+  valeur_creativite: 3,
+  valeur_securite: 3,
+  valeur_aider: 2,
+  valeur_autonomie: 3,
+  valeur_curiosite: 3,
+  valeur_collaboration: 2,
+  valeur_reconnaissance: 3,
+  valeur_equilibre: 3,
+  valeur_defis: 3,
+  valeur_justice: 3,
+  valeur_nature: 4
+}
+🧾 Étape 1 - Profil principal : {
+  "analyse_profil": "Elowyne, 18 ans, se distingue par une forte ambition financière, souhaitant \"gagner de l'argent\" et même devenir \"riche\", notamment pour réaliser des projets personnels coûteux comme l'achat et la participation à des concours hippiques avec un cheval. Cette motivation se conjugue avec une passion profonde et variée pour les animaux (cheval, aquariophilie, s'occuper des animaux) et la nature. 
+Elle possède des talents artistiques avérés (dessin) et des compétences sportives, complétées par un intérêt pour la danse (hip hop, K-pop) 
+et une inspiration pour les performeurs coréens, suggérant un goût pour la discipline, l'esthétique et la visibilité. Son apprentissage est 
+majoritairement visuel, et elle valorise les environnements extérieurs, l'autonomie, la créativité, l'aventure et les défis. Son profil révèle un potentiel pour des carrières dynamiques qui allient entrepreneuriat, art, bien-être animal et respect de l'environnement.",
+  "recommandations_carrieres": [
+    {
+      "titre": "Entrepreneur(e) / Designer de produits écologiques pour animaux",
+      "description": "Créer et développer sa propre marque d'accessoires ou de produits de soin éco-responsables pour les animaux, avec une 
+spécialisation potentielle dans l'équitation ou l'aquariophilie. Cela implique la conception (dessin), la fabrication (éventuellement en collaboration), le marketing digital, la vente et la gestion d'entreprise, en valorisant la durabilité et le bien-être animal.",
+      "pourquoi_innovant_non_traditionnel": "Plutôt que de chercher un emploi, Elowyne exploiterait son talent créatif, sa passion pour les 
+animaux et son ambition financière pour bâtir une entreprise à son image. Le marché des produits éco-responsables pour animaux est en croissance, offrant une opportunité de se démarquer par l'innovation et les valeurs.",
+      "competences_cles": [
+        "Design produit",
+        "Entrepreneuriat",
+        "Marketing digital",
+        "Gestion de projet",
+        "Connaissances en zootechnie ou éthologie",
+        "Communication commerciale"
+      ],
+      "etapes_concretes": [
+        "Se former en design, entrepreneuriat ou marketing digital (BTS, Licence Pro, école de commerce).",
+        "Développer un business plan solide et réaliser une étude de marché.",
+        "Créer des prototypes et utiliser son talent en dessin pour l'identité visuelle de la marque.",
+        "Lancer une boutique en ligne et/ou participer à des marchés spécialisés."
+      ]
+    },
+    {
+      "titre": "Artiste-Performeuse Équestre ou Aquascaper & Créatrice de Contenu Numérique",
+      "description": "Combiner l'amour des animaux (cheval, aquariophilie) avec la créativité et la performance. Cela peut se traduire par des spectacles équestres innovants (chorégraphies, costumes) ou la création d'aquariums paysagers artistiques (aquascaping) documentés et mis en scène pour des plateformes comme YouTube, Instagram ou TikTok. La monétisation proviendrait du sponsoring, des partenariats et des ventes liées à son contenu ou ses créations.",
+      "pourquoi_innovant_non_traditionnel": "Cette voie transforme une passion en un métier créatif et visible, sortant des schémas classiques. L'inspiration K-pop peut être intégrée pour une approche visuelle et performative unique, faisant d'Elowyne une figure influente dans ses domaines d'expertise.",
+      "competences_cles": [
+        "Dressage équestre artistique ou aquascaping avancé",
+        "Création de contenu vidéo/photo",
+        "Montage et post-production",
+        "Marketing d'influence",
+        "Storytelling",
+        "Gestion de communauté"
+      ],
+      "etapes_concretes": [
+        "Développer les compétences spécifiques (dressage de spectacle, aquascaping avancé, techniques de danse).",
+        "Se former aux outils de création de contenu (logiciels de montage vidéo/photo).",
+        "Construire un portfolio artistique et une présence active sur les plateformes numériques.",
+        "Rechercher des collaborations avec d'autres artistes, marques ou événements."
+      ]
+    },
+    {
+      "titre": "Architecte Paysagiste Faunistique / Spécialiste en Aménagement de Habitats Animaliers",
+      "description": "Concevoir et aménager des espaces extérieurs (parcs, jardins, installations équestres, refuges animaliers) en intégrant des principes écologiques avancés, de biodiversité et de bien-être animal. Ce rôle implique la planification, le dessin technique, la sélection de végétaux et de matériaux respectueux de l'environnement, avec un accent sur la création d'habitats adaptés aux besoins spécifiques 
+des animaux (domestiques ou sauvages).",
+      "pourquoi_innovant_non_traditionnel": "Au-delà de l'architecture paysagère classique, cette approche intègre une expertise zootechnique ou éthologique pour des designs qui favorisent activement la faune et le bien-être animal, un domaine en forte demande et en évolution rapide, conciliant nature, animaux et compétences créatives (dessin, conception).",
+      "competences_cles": [
+        "Architecture paysagère",
+        "Écologie et biodiversité",
+        "Zootechnie ou éthologie",
+        "Dessin technique assisté par ordinateur (DAO)",
+        "Gestion de projet",
+        "Botanique",
+        "Communication client et négociation"
+      ],
+      "etapes_concretes": [
+        "Poursuivre des études supérieures en paysage, écologie, zootechnie ou sciences de l'environnement (BTS, Licence Pro, Master, école 
+d'ingénieurs).",
+        "Acquérir une expérience pratique via des stages ou du bénévolat dans des parcs animaliers, refuges ou bureaux d'études paysagers.",        "Développer un réseau professionnel dans le secteur de l'aménagement durable et du bien-être animal.",
+        "Se spécialiser dans des niches comme l'écopâturage, les parcs animaliers ou les fermes pédagogiques."
+      ]
+    }
+  ],
+  "conseils_generaux": {
+    "recommandations": [
+      "Explorez les formations qui combinent art, entrepreneuriat et sciences animales pour trouver la voie qui vous permettra de concilier 
+vos passions et votre ambition financière.",
+      "Développez vos compétences en dessin et en gestion de projet, car elles sont transversales à de nombreuses carrières créatives et entrepreneuriales.",
+      "Utilisez votre style d'apprentissage visuel en privilégiant les stages, les tutoriels vidéo et les projets concrets pour acquérir de 
+nouvelles connaissances et compétences.",
+      "Ne craignez pas de l'autonomie et des défis, car les carrières innovantes requièrent souvent de la prise d'initiative et une capacité à créer sa propre voie.",
+      "Inspirez-vous des danseurs K-pop non seulement pour l'art, mais aussi pour leur discipline, leur professionnalisme et leur capacité à créer une marque personnelle forte.",
+      "Réseau social professionnellement : participez à des salons, ateliers, conférences liés aux animaux, à l'équitation, à l'entrepreneuriat ou au design pour découvrir des opportunités et des mentors.",
+      "Envisagez l'apprentissage de langues étrangères ou des stages à l'étranger pour élargir vos horizons, comme suggéré par votre intérêt pour la K-pop et les tendances internationales."
+    ]
+  }
+}
+📥 Données reçues pour interprétation : { ileDeserte: 'Outil multifonction', videos: 'Sport' }
+🧠 Réponse brute île déserte : Ce choix révèle un esprit pratique, ingénieux et prévoyant, qui valorise l'autonomie et la capacité à s'adapter et à résoudre une multitude de problèmes avec efficacité.
+🎬 Réponse brute vidéos : Le choix de vidéos de "Sport" révèle un intérêt pour l'action, la performance, l'effort et le dépassement de soi, 
+des valeurs centrales du monde sportif.
+📦 Réponse fusionnée : {
+  "analyse_profil": "Elowyne, 18 ans, se distingue par une forte ambition financière, souhaitant \"gagner de l'argent\" et même devenir \"riche\", notamment pour réaliser des projets personnels coûteux comme l'achat et la participation à des concours hippiques avec un cheval. Cette motivation se conjugue avec une passion profonde et variée pour les animaux (cheval, aquariophilie, s'occuper des animaux) et la nature. 
+Elle possède des talents artistiques avérés (dessin) et des compétences sportives, complétées par un intérêt pour la danse (hip hop, K-pop) 
+et une inspiration pour les performeurs coréens, suggérant un goût pour la discipline, l'esthétique et la visibilité. Son apprentissage est 
+majoritairement visuel, et elle valorise les environnements extérieurs, l'autonomie, la créativité, l'aventure et les défis. Son profil révèle un potentiel pour des carrières dynamiques qui allient entrepreneuriat, art, bien-être animal et respect de l'environnement.",
+  "recommandations_carrieres": [
+    {
+      "titre": "Entrepreneur(e) / Designer de produits écologiques pour animaux",
+      "description": "Créer et développer sa propre marque d'accessoires ou de produits de soin éco-responsables pour les animaux, avec une 
+spécialisation potentielle dans l'équitation ou l'aquariophilie. Cela implique la conception (dessin), la fabrication (éventuellement en collaboration), le marketing digital, la vente et la gestion d'entreprise, en valorisant la durabilité et le bien-être animal.",
+      "pourquoi_innovant_non_traditionnel": "Plutôt que de chercher un emploi, Elowyne exploiterait son talent créatif, sa passion pour les 
+animaux et son ambition financière pour bâtir une entreprise à son image. Le marché des produits éco-responsables pour animaux est en croissance, offrant une opportunité de se démarquer par l'innovation et les valeurs.",
+      "competences_cles": [
+        "Design produit",
+        "Entrepreneuriat",
+        "Marketing digital",
+        "Gestion de projet",
+        "Connaissances en zootechnie ou éthologie",
+        "Communication commerciale"
+      ],
+      "etapes_concretes": [
+        "Se former en design, entrepreneuriat ou marketing digital (BTS, Licence Pro, école de commerce).",
+        "Développer un business plan solide et réaliser une étude de marché.",
+        "Créer des prototypes et utiliser son talent en dessin pour l'identité visuelle de la marque.",
+        "Lancer une boutique en ligne et/ou participer à des marchés spécialisés."
+      ]
+    },
+    {
+      "titre": "Artiste-Performeuse Équestre ou Aquascaper & Créatrice de Contenu Numérique",
+      "description": "Combiner l'amour des animaux (cheval, aquariophilie) avec la créativité et la performance. Cela peut se traduire par des spectacles équestres innovants (chorégraphies, costumes) ou la création d'aquariums paysagers artistiques (aquascaping) documentés et mis en scène pour des plateformes comme YouTube, Instagram ou TikTok. La monétisation proviendrait du sponsoring, des partenariats et des ventes liées à son contenu ou ses créations.",
+      "pourquoi_innovant_non_traditionnel": "Cette voie transforme une passion en un métier créatif et visible, sortant des schémas classiques. L'inspiration K-pop peut être intégrée pour une approche visuelle et performative unique, faisant d'Elowyne une figure influente dans ses domaines d'expertise.",
+      "competences_cles": [
+        "Dressage équestre artistique ou aquascaping avancé",
+        "Création de contenu vidéo/photo",
+        "Montage et post-production",
+        "Marketing d'influence",
+        "Storytelling",
+        "Gestion de communauté"
+      ],
+      "etapes_concretes": [
+        "Développer les compétences spécifiques (dressage de spectacle, aquascaping avancé, techniques de danse).",
+        "Se former aux outils de création de contenu (logiciels de montage vidéo/photo).",
+        "Construire un portfolio artistique et une présence active sur les plateformes numériques.",
+        "Rechercher des collaborations avec d'autres artistes, marques ou événements."
+      ]
+    },
+    {
+      "titre": "Architecte Paysagiste Faunistique / Spécialiste en Aménagement de Habitats Animaliers",
+      "description": "Concevoir et aménager des espaces extérieurs (parcs, jardins, installations équestres, refuges animaliers) en intégrant des principes écologiques avancés, de biodiversité et de bien-être animal. Ce rôle implique la planification, le dessin technique, la sélection de végétaux et de matériaux respectueux de l'environnement, avec un accent sur la création d'habitats adaptés aux besoins spécifiques 
+des animaux (domestiques ou sauvages).",
+      "pourquoi_innovant_non_traditionnel": "Au-delà de l'architecture paysagère classique, cette approche intègre une expertise zootechnique ou éthologique pour des designs qui favorisent activement la faune et le bien-être animal, un domaine en forte demande et en évolution rapide, conciliant nature, animaux et compétences créatives (dessin, conception).",
+      "competences_cles": [
+        "Architecture paysagère",
+        "Écologie et biodiversité",
+        "Zootechnie ou éthologie",
+        "Dessin technique assisté par ordinateur (DAO)",
+        "Gestion de projet",
+        "Botanique",
+        "Communication client et négociation"
+      ],
+      "etapes_concretes": [
+        "Poursuivre des études supérieures en paysage, écologie, zootechnie ou sciences de l'environnement (BTS, Licence Pro, Master, école 
+d'ingénieurs).",
+        "Acquérir une expérience pratique via des stages ou du bénévolat dans des parcs animaliers, refuges ou bureaux d'études paysagers.",        "Développer un réseau professionnel dans le secteur de l'aménagement durable et du bien-être animal.",
+        "Se spécialiser dans des niches comme l'écopâturage, les parcs animaliers ou les fermes pédagogiques."
+      ]
+    }
+  ],
+  "conseils_generaux": {
+    "recommandations": [
+      "Explorez les formations qui combinent art, entrepreneuriat et sciences animales pour trouver la voie qui vous permettra de concilier 
+vos passions et votre ambition financière.",
+      "Développez vos compétences en dessin et en gestion de projet, car elles sont transversales à de nombreuses carrières créatives et entrepreneuriales.",
+      "Utilisez votre style d'apprentissage visuel en privilégiant les stages, les tutoriels vidéo et les projets concrets pour acquérir de 
+nouvelles connaissances et compétences.",
+      "Ne craignez pas de l'autonomie et des défis, car les carrières innovantes requièrent souvent de la prise d'initiative et une capacité à créer sa propre voie.",
+      "Inspirez-vous des danseurs K-pop non seulement pour l'art, mais aussi pour leur discipline, leur professionnalisme et leur capacité à créer une marque personnelle forte.",
+      "Réseau social professionnellement : participez à des salons, ateliers, conférences liés aux animaux, à l'équitation, à l'entrepreneuriat ou au design pour découvrir des opportunités et des mentors.",
+      "Envisagez l'apprentissage de langues étrangères ou des stages à l'étranger pour élargir vos horizons, comme suggéré par votre intérêt pour la K-pop et les tendances internationales."
+    ]
+  },
+  "ileDeserte": "Outil multifonction",
+  "interpretation_ileDeserte": "Ce choix révèle un esprit pratique, ingénieux et prévoyant, qui valorise l'autonomie et la capacité à s'adapter et à résoudre une multitude de problèmes avec efficacité.",
+  "videos": "Sport",
+  "interpretation_videos": "Le choix de vidéos de \"Sport\" révèle un intérêt pour l'action, la performance, l'effort et le dépassement de soi, des valeurs centrales du monde sportif."
+}

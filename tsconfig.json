@@ -1,0 +1,55 @@
+{
+  "compilerOptions": {
+    // 📁 Structure du projet
+    "rootDir": "src",
+    "outDir": "dist",
+
+    // ⚙️ Environnement
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "lib": ["DOM", "ES2020"],
+    "types": ["node"],
+
+    // 🧠 Typechecking strict
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // 🧾 Génération de fichiers
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+
+    // ⚛️ React
+    "jsx": "react-jsx",
+
+    // ✅ Compatibilité & modules
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
+    "noUncheckedSideEffectImports": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true,
+
+    // 🧩 Ajouts utiles
+    "resolveJsonModule": true,
+    "incremental": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["*"],
+      "@components/*": ["components/*"],
+      "@lib/*": ["lib/*"],
+      "@hooks/*": ["hooks/*"],
+      "@server/*": ["server/*"],
+      "@shared/*": ["shared/*"]
+    },
+
+    // 🧹 Nettoyage optionnel
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}
