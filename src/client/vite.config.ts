@@ -23,8 +23,15 @@ export default defineConfig({
       }
     }
   },
-  build: {
-    outDir: path.resolve(__dirname, 'dist'),
-    emptyOutDir: true
+
+
+build: {
+  outDir: path.resolve(__dirname, 'dist'),
+  emptyOutDir: true,
+  rollupOptions: {
+    input: path.resolve(__dirname, 'src/client/index.html')
   }
+}
+
+
 });
