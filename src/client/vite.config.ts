@@ -13,8 +13,8 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    host: true,         // ← autorise l'accès réseau (localhost + IP locale)
-    strictPort: true,   // ← empêche Vite de changer de port
+    host: true,
+    strictPort: true,
     proxy: {
       '/api': {
         target: 'http://localhost:5000',
@@ -23,15 +23,11 @@ export default defineConfig({
       }
     }
   },
-
-
-build: {
-  outDir: path.resolve(__dirname, 'dist'),
-  emptyOutDir: true,
-  rollupOptions: {
-    input: path.resolve(__dirname, 'src/client/index.html')
+  build: {
+    outDir: path.resolve(__dirname, 'dist'),
+    emptyOutDir: true,
+    rollupOptions: {
+      input: path.resolve(__dirname, 'src/client/index.html')
+    }
   }
-}
-
-
 });
