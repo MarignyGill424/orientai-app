@@ -1,12 +1,13 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import path from 'path';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
+  root: '.', // ← racine du projet
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'),
+      '@': path.resolve(__dirname, 'src/client/src'), // ← ton vrai code
       '@shared': path.resolve(__dirname, 'shared')
     }
   },
@@ -26,4 +27,4 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true
   }
-});
+})
