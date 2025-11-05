@@ -4,10 +4,9 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
-  root: '.', // ← racine du projet
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src/client/src'), // ← ton vrai code
+      '@': path.resolve(__dirname, 'src/client/src'),
       '@shared': path.resolve(__dirname, 'shared')
     }
   },
@@ -25,6 +24,9 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    emptyOutDir: true
+    emptyOutDir: true,
+    rollupOptions: {
+      input: path.resolve(__dirname, 'index.html') // ← point d’entrée explicite
+    }
   }
 })
