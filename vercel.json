@@ -1,11 +1,6 @@
+# Ouvre le fichier et remplace tout par :
 {
   "rewrites": [
     { "source": "/(.*)", "destination": "/" }
-  ],
-  "builds": [
-    {
-      "src": "index.html",
-      "use": "@vercel/static"
-    }
   ]
 }
