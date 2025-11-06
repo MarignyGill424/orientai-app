@@ -185,17 +185,6 @@ Voici le format attendu :
 
 async function generateInterpretations(formulaire: any) {
   if (!ai) throw new Error("Gemini API non initialisée");
-const prenom = formulaire.prenom;
-const genre = formulaire.genre;
-
-const pronoms = genre === "femme"
-  ? { il: "elle", le: "la", lui: "elle", son: "sa", sa: "sa", ses: "ses" }
-  : genre === "homme"
-    ? { il: "il", le: "le", lui: "lui", son: "son", sa: "sa", ses: "ses" }
-    : { il: "iel", le: "le·la", lui: "lui·elle", son: "son·sa", sa: "son·sa", ses: "ses" };
-
-
-
   const model = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
 
   console.log("📥 Données reçues pour interprétation :", {

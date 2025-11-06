@@ -189,6 +189,11 @@ export default function Resultats() {
     )}
   </div>
 )}
+</div>
+);
+}
+
+
 
 
 
