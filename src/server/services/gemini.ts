@@ -4,14 +4,19 @@ import path from "path";
 
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
+
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 console.log("🔑 Clé Gemini chargée :", GEMINI_API_KEY?.slice(0, 5));
 
 if (!GEMINI_API_KEY) {
   console.warn("⚠️ Clé API Gemini manquante. Réponse simulée activée.");
+  throw new Error("Clé GEMINI_API_KEY absente en production");
 }
 
-const ai = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
+const ai = new GoogleGenerativeAI(GEMINI_API_KEY);
+console.log("🧠 Objet Gemini :", ai ? "✅ OK" : "❌ Indéfini");
+
+
 
 function normalizeGeminiResponse(parsed: any) {
   const rawMetiers = parsed.recommandations_carrieres || [];
