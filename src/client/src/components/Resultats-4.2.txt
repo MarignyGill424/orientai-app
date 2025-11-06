@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { OrientationResults } from "../types";
 import TypewriterText from "../components/TypewriterText";
@@ -9,22 +9,16 @@ import html2canvas from "html2canvas";
 export default function Resultats() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [profil, setProfil] = useState<OrientationResults | null>(null);
+  const [chargement, setChargement] = useState(true);
 
-  const { profil, source } = location.state as {
-    profil: OrientationResults;
-    source: string;
-  };
-
-  if (!profil || typeof profil !== "object") {
-    return (
-      <div style={{ padding: "2rem" }}>
-        <h1>❌ Aucun profil à afficher</h1>
-        <p>Il semble que les données n’aient pas été transmises correctement.</p>
-        <button onClick={() => navigate("/")}>🔙 Retour au questionnaire</button>
-        <pre>{JSON.stringify(profil, null, 2)}</pre>
-      </div>
-    );
-  }
+  useEffect(() => {
+    const data = location.state as OrientationResults;
+    if (data) {
+      setProfil(data);
+    }
+    setChargement(false);
+  }, [location.state]);
 
   function downloadConseils(conseils: Record<string, string>) {
     const contenu = Object.entries(conseils)
@@ -41,6 +35,10 @@ export default function Resultats() {
     link.click();
     document.body.removeChild(link);
   }
+
+
+
+
 
   function downloadProfilComplet(profil: OrientationResults) {
     const contenu = [
@@ -74,11 +72,42 @@ export default function Resultats() {
     pdf.save("profil_orientation.pdf");
   }
 
+  if (chargement) {
+    return (
+      <div style={{ padding: "2rem", textAlign: "center" }}>
+        <h2>⏳ Ton profil est en cours de création…</h2>
+        <p>Merci de patienter, cela peut prendre jusqu’à 2 minutes 🙏</p>
+        <div className="loader" />
+      </div>
+    );
+  }
+
+  if (!profil || typeof profil !== "object") {
+    return (
+      <div style={{ padding: "2rem" }}>
+
+
+        <h1>❌ Aucun profil à afficher</h1>
+        <p>Il semble que les données n’aient pas été transmises correctement.</p>
+        <button onClick={() => navigate("/")}>🔙 Retour au questionnaire</button>
+        <pre>{JSON.stringify(profil, null, 2)}</pre>
+      </div>
+    );
+  }
+
   return (
     <div style={{ padding: "2rem" }}>
-      <h1>🎓 {profil.introduction || "Ton profil d’orientation"}</h1>
+      
+     {profil.introduction ? (
+       <h1 style={{ fontSize: "1.8rem", marginBottom: "1rem" }}>
+         🎓 {profil.introduction}
+       </h1>
+      ) : (
+       <h1>🎓 Ton profil d’orientation</h1>
+      )}
 
-      {profil.analyse_profil && (
+
+      {profil.analyse_profil ? (
         <>
           <h2>🧠 Analyse du profil</h2>
           {typeof profil.analyse_profil === "string" ? (
@@ -93,9 +122,11 @@ export default function Resultats() {
             </ul>
           )}
         </>
+      ) : (
+        <p>Profil de personnalité non disponible.</p>
       )}
 
-      {Array.isArray(profil.recommandations_carrieres) && profil.recommandations_carrieres.length > 0 && (
+      {Array.isArray(profil.recommandations_carrieres) && profil.recommandations_carrieres.length > 0 ? (
         <>
           <h2>🎯 Métiers suggérés</h2>
           <ul>
@@ -109,6 +140,8 @@ export default function Resultats() {
             ))}
           </ul>
         </>
+      ) : (
+        <p>Aucun métier suggéré pour l’instant.</p>
       )}
 
       <h2>🏝️ Ton île déserte</h2>
@@ -121,7 +154,7 @@ export default function Resultats() {
         <strong>{profil.videos || "Aucune sélection"}</strong> — {profil.interpretation_videos || "Interprétation non disponible"}
       </p>
 
-      {profil.conseils_generaux && typeof profil.conseils_generaux === "object" && (
+      {profil.conseils_generaux && typeof profil.conseils_generaux === "object" ? (
         <>
           <h2>📚 Conseils généraux</h2>
           <ul style={{ listStyle: "none", paddingLeft: 0 }}>
@@ -142,17 +175,25 @@ export default function Resultats() {
           </ul>
 
           <div style={{ marginTop: "1rem" }}>
-            <button onClick={() => downloadConseils(profil.conseils_generaux)}>📥 Télécharger mes conseils</button>
+            <button onClick={() => downloadConseils(profil.conseils_generaux)}>
+              📥 Télécharger mes conseils
+            </button>
           </div>
 
           <div style={{ marginTop: "1rem" }}>
-            <button onClick={() => downloadProfilComplet(profil)}>📄 Télécharger mon profil complet</button>
+            <button onClick={() => downloadProfilComplet(profil)}>
+              📄 Télécharger mon profil complet
+            </button>
           </div>
 
           <div style={{ marginTop: "1rem" }}>
-            <button onClick={handleExportPDF}>🧾 Exporter en PDF</button>
+            <button onClick={handleExportPDF}>
+              🧾 Exporter en PDF
+            </button>
           </div>
         </>
+      ) : (
+        <p>Aucun conseil disponible pour le moment.</p>
       )}
 
       {profil.message_inspirant && (
@@ -161,15 +202,19 @@ export default function Resultats() {
         </blockquote>
       )}
 
-      {profil?.fierte && profil.fierte.length > 10 && (
-        <div style={{ marginTop: "2rem", padding: "1rem", background: "#e6ffed", borderLeft: "4px solid #38a169", borderRadius: "8px" }}>
-          <h3 style={{ marginBottom: "0.5rem" }}>🌟 Ce dont tu peux être fier·e</h3>
-          <p style={{ fontStyle: "italic", marginBottom: "0.5rem" }}>« {profil.fierte} »</p>
-          <p style={{ fontSize: "0.9rem" }}>
-            Ce souvenir montre que tu es capable de belles choses. Garde-le en tête quand tu doutes — il est la preuve que tu avances déjà.
-          </p>
-        </div>
-      )}
+
+{/* 🌟 Message motivant basé sur la fierté */}
+{profil?.fierte && profil.fierte.length > 10 && (
+  <div style={{ marginTop: "2rem", padding: "1rem", background: "#e6ffed", borderLeft: "4px solid #38a169", borderRadius: "8px" }}>
+    <h3 style={{ marginBottom: "0.5rem" }}>🌟 Ce dont tu peux être fier·e</h3>
+    <p style={{ fontStyle: "italic", marginBottom: "0.5rem" }}>« {profil.fierte} »</p>
+    <p style={{ fontSize: "0.9rem" }}>
+      Ce souvenir montre que tu es capable de belles choses. Garde-le en tête quand tu doutes — il est la preuve que tu avances déjà.
+    </p>
+  </div>
+)}
+
+{/* 📊 Message motivant basé sur le niveau de confiance */}
 {typeof profil?.confiance === "number" && (
   <div style={{ marginTop: "2rem", padding: "1rem", background: "#f3e8ff", borderLeft: "4px solid #9f7aea", borderRadius: "8px" }}>
     {profil.confiance >= 8 && (
@@ -192,3 +237,47 @@ export default function Resultats() {
 
 
 
+<div style={{ marginTop: "2rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
+  {/* ✅ Sauvegarder le dialogue */}
+  <button
+    onClick={() => localStorage.setItem("profilTemp", JSON.stringify(profil))}
+    style={{ padding: "0.75rem", backgroundColor: "#e6fffa", borderLeft: "4px solid #2c7a7b", borderRadius: "8px" }}
+  >
+    ✅ Sauvegarder mon dialogue
+  </button>
+
+  {/* ✏️ Modifier le dialogue */}
+  <button
+    onClick={() => navigate("/", { state: profil })}
+    style={{ padding: "0.75rem", backgroundColor: "#fefcbf", borderLeft: "4px solid #d69e2e", borderRadius: "8px" }}
+  >
+    ✏️ Modifier mon dialogue
+  </button>
+
+  {/* 🔁 Recommencer à zéro */}
+  <button
+    onClick={() => {
+      localStorage.removeItem("profilTemp");
+      navigate("/");
+    }}
+    style={{ padding: "0.75rem", backgroundColor: "#fed7d7", borderLeft: "4px solid #c53030", borderRadius: "8px" }}
+  >
+    🔁 Recommencer à zéro
+  </button>
+</div>
+
+
+
+
+      <div className="no-print" style={{ marginTop: "2rem" }}>
+        <button onClick={() => window.print()}>🖨️ Imprimer mon profil</button>
+      </div>
+
+      <div style={{ marginTop: "2rem" }}>
+        <button onClick={() => navigate("/")}>
+          🔁 Recommencer le questionnaire
+        </button>
+      </div>
+    </div>
+  );
+}
