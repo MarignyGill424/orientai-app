@@ -1,0 +1,237 @@
+.gitignore
+"Profil g\303\251n\303\251r\303\251.txt"
+README.md
+ReadMe.md
+Vercel/api/orientation.ts
+Vercel/vercel lancement.txt
+arborescence-complete.txt
+arborescence.txt
+arborescence.txt20
+architecture serveur.docx
+build-all.ts
+check-env.js
+check-env.mjs
+generate-ui-components.cjs
+index.html
+index.ts
+index.ts sous oreintAI-app.txt
+index_unused.ts
+loader.tsx
+package-lock.json
+package.json
+package.json  save.txt
+render.yaml
+"resultats provisoires/Profil g\303\251n\303\251r\303\251.docx"
+resultats provisoires/_result conseils_orientation.txt
+resultats provisoires/_resultat du questionnaire.txt
+resultats provisoires/dialogue A1.txt
+resultats provisoires/prfil orientation19.jpg
+resultats provisoires/profil d'orientation 1.jpg
+"resultats provisoires/profil d'orientation g\303\251n\303\251r\303\251A1.txt"
+"resultats provisoires/profil entr\303\251 A1.txt"
+"resultats provisoires/profil re\303\247u.txt"
+resultats provisoires/rep terminal.txt
+resultats provisoires/resultat terminal client 5.jpg
+resultats provisoires/resultat terminal client 7.jpg
+resultats provisoires/resultat terminal client 8.jpg
+resultats provisoires/resultat terminal client 9.jpg
+"resultats provisoires/r\303\251ponse du terminal serveur au questionnaire .jpg"
+resultats provisoires/temp msg11.jpg
+resultats provisoires/~$ Ton profil d'Elowyne.docx
+"resultats provisoires/~$ofil g\303\251n\303\251r\303\251.docx"
+resultats provisoires/~WRL1462.tmp
+"resultats provisoires/\360\237\216\223 Ton profil d'Elowyne.docx"
+routes.ts
+shared/schema.ts
+src/App.tsx
+src/client/.gitignore
+src/client/README.md
+src/client/api/orientation.ts
+src/client/eslint.config.js
+src/client/index_backup.html
+src/client/orientAI-app/src/client/tsconfig.client.json
+src/client/orientAI-app/src/client/vite.config.ts
+src/client/orientAI-app/src/server/tsconfig.server.json
+src/client/orientAI-app/tsconfig.base.json
+src/client/package-lock.json
+src/client/package.json
+src/client/public/vite.svg
+src/client/src/App.css
+src/client/src/App.tsx
+src/client/src/Utils/generatePDF.ts
+src/client/src/Utils/textUtils.ts
+src/client/src/assets/logoBase64.ts
+src/client/src/assets/react.svg
+src/client/src/components/OrientationForm.tsx
+src/client/src/components/ProfilEtPrompt text-V1 OK.txt
+src/client/src/components/ProfilEtPrompt text.txt
+src/client/src/components/ProfilEtPrompt.tsx
+src/client/src/components/QuestionnaireWrapper.save.tsx
+src/client/src/components/QuestionnaireWrapper.tsx
+src/client/src/components/QuestionnaireWrappersave1.tsx
+src/client/src/components/Resultats-1ok.txt
+src/client/src/components/Resultats-2OK.txt
+src/client/src/components/Resultats-4.1.txt
+src/client/src/components/Resultats-4.txt
+src/client/src/components/Resultats.css
+src/client/src/components/Resultats.tsx
+src/client/src/components/Resultats.tsx.txt
+src/client/src/components/Resultats3 save.txt
+src/client/src/components/TypewriterText.tsx
+src/client/src/components/button.tsx
+src/client/src/components/form/AppMagiqueInput.tsx
+src/client/src/components/form/SelectObjet.tsx
+src/client/src/components/form/SelectVideos.tsx
+src/client/src/components/input.tsx
+src/client/src/components/interpretation/InterpretationValeursPhares.tsx
+src/client/src/components/questionnaire-form .tsx OK.txt
+src/client/src/components/questionnaire-form .tsx6 gauge.txt
+src/client/src/components/questionnaire-form .tsx7.1 gauge.txt
+src/client/src/components/questionnaire-form .tsx7.2 gauge.txt
+src/client/src/components/questionnaire-form .tsx7.3 gauge.txt
+src/client/src/components/questionnaire-form .tsx7.4 av 4.5 et 4.6.txt
+src/client/src/components/questionnaire-form .tsx7gauge.txt
+src/client/src/components/questionnaire-form .tsx8 av save.txt
+src/client/src/components/questionnaire-form .tsx8.1 av save.txt
+src/client/src/components/questionnaire-form .tsx8.2 av save.txt
+src/client/src/components/questionnaire-form .tsx8.3 av save.txt
+src/client/src/components/questionnaire-form .tsx8.4 av save.txt
+src/client/src/components/questionnaire-form .tsx8.5 av save.txt
+src/client/src/components/questionnaire-form .tsx8.6 av save.txt
+src/client/src/components/questionnaire-form .tsx8.7 av save.txt
+src/client/src/components/questionnaire-form .tsx8.8 av save ok.txt
+src/client/src/components/questionnaire-form .tsx9 new clear save ok.txt
+src/client/src/components/questionnaire-form .tsx9.1 new clear save ok.txt
+src/client/src/components/questionnaire-form .tsx9.2 new clear save ok.txt
+src/client/src/components/questionnaire-form .tsx9.3 new clear save ok.txt
+src/client/src/components/questionnaire-form .tsx9.4 new clear save ok.txt
+src/client/src/components/questionnaire-form ok.tsx.txt
+src/client/src/components/questionnaire-form ok.tsx1.txt
+src/client/src/components/questionnaire-form ok.tsx2 freins .txt
+"src/client/src/components/questionnaire-form ok.tsx3 fiert\303\251 .txt"
+src/client/src/components/questionnaire-form ok.tsx4 echelle confiancext.txt
+src/client/src/components/questionnaire-form ok.tsx5 slider.txt
+src/client/src/components/questionnaire-form text N-A1deb profill ok.txt
+src/client/src/components/questionnaire-form text N-A2deb profill ok.txt
+src/client/src/components/questionnaire-form text j1 ok mais pb ile deserte.txt
+src/client/src/components/questionnaire-form text4..txt
+src/client/src/components/questionnaire-form textA0..txt
+src/client/src/components/questionnaire-form textA1..txt
+src/client/src/components/questionnaire-form textA2.txt
+src/client/src/components/questionnaire-form textA3.txt
+src/client/src/components/questionnaire-form textA4.txt
+src/client/src/components/questionnaire-form textA5.txt
+src/client/src/components/questionnaire-form textA7.txt
+src/client/src/components/questionnaire-form textA8.txt
+src/client/src/components/questionnaire-form textA9.txt
+src/client/src/components/questionnaire-form textB.txt
+src/client/src/components/questionnaire-form textB0 fonctionne sauf select .txt
+src/client/src/components/questionnaire-form textB1.txt
+src/client/src/components/questionnaire-form textB2.txt
+src/client/src/components/questionnaire-form textB3.txt
+src/client/src/components/questionnaire-form textB4.txt
+src/client/src/components/questionnaire-form textC1 version Copilote.txt
+src/client/src/components/questionnaire-form textD.txt
+src/client/src/components/questionnaire-form textD1.txt
+src/client/src/components/questionnaire-form textD2.txt
+src/client/src/components/questionnaire-form textD3.txt
+src/client/src/components/questionnaire-form textD4.txt
+src/client/src/components/questionnaire-form textD5.txt
+src/client/src/components/questionnaire-form textD6.txt
+src/client/src/components/questionnaire-form textE1.txt
+"src/client/src/components/questionnaire-form textE10 ok d\303\251sert.txt"
+src/client/src/components/questionnaire-form textE2.txt
+src/client/src/components/questionnaire-form textE3.txt
+src/client/src/components/questionnaire-form textE4.txt
+src/client/src/components/questionnaire-form textE5.txt
+src/client/src/components/questionnaire-form textE6.txt
+src/client/src/components/questionnaire-form textE7.txt
+"src/client/src/components/questionnaire-form textE8-OK mais pas ile d\303\251serte.txt"
+"src/client/src/components/questionnaire-form textE9 ok pas d\303\251sert.txt"
+src/client/src/components/questionnaire-form textF.txt
+"src/client/src/components/questionnaire-form textF0-ok-d\303\251sert-video-b\303\251n\303\251volat.txt"
+src/client/src/components/questionnaire-form textF1 o.txt
+src/client/src/components/questionnaire-form textF1.txt
+src/client/src/components/questionnaire-form textG0 OK.txt
+src/client/src/components/questionnaire-form textG1 msgK.txt
+src/client/src/components/questionnaire-form textG2 icones desert....txt
+"src/client/src/components/questionnaire-form textG3 centres int\303\251ret sr m lg.txt"
+src/client/src/components/questionnaire-form textG4 alignement des cases.txt
+"src/client/src/components/questionnaire-form textG5 new d\303\251serte.txt"
+"src/client/src/components/questionnaire-form textG6 expl d\303\251sert+ composant.txt"
+src/client/src/components/questionnaire-form textG7 expl radio Ok.txt
+src/client/src/components/questionnaire-form textG7 expl radio pbdb.txt
+src/client/src/components/questionnaire-form textG7 radio OK.txt
+src/client/src/components/questionnaire-form textG8 radio bulle OK.txt
+src/client/src/components/questionnaire-form textG9 ValeursGN OK.txt
+"src/client/src/components/questionnaire-form textH0 cases align\303\251es.txt"
+"src/client/src/components/questionnaire-form textH1 B\303\251n\303\251volat.txt"
+src/client/src/components/questionnaire-form textI1 GN profil OK puis page blanche ref.txt
+src/client/src/components/questionnaire-form textI1 GN1 profil+ OK.txt
+src/client/src/components/questionnaire-form textI1 GN2 talents pb.txt
+src/client/src/components/questionnaire-form-I1 GN profil-pb.tsx
+src/client/src/components/questionnaire-form.tsx
+src/client/src/components/questionnaire-formold.tsx
+src/client/src/components/textarea.tsx
+src/client/src/components/ui/MentorBubble.tsx
+src/client/src/components/ui/button.tsx
+src/client/src/components/ui/card.tsx
+src/client/src/components/ui/checkbox.tsx
+src/client/src/components/ui/form-field.tsx
+src/client/src/components/ui/input.tsx
+src/client/src/components/ui/label.tsx
+src/client/src/components/ui/modal.tsx
+src/client/src/components/ui/radio-group.tsx
+src/client/src/components/ui/select.tsx
+src/client/src/components/ui/slider.tsx
+src/client/src/components/ui/textarea.tsx
+src/client/src/components/utils.tsx
+src/client/src/hooks/use-toast.ts
+src/client/src/index.css
+src/client/src/lib/queryClient.ts
+src/client/src/main.tsx
+src/client/src/shared/schema.ts
+src/client/src/types.ts
+src/client/src/vite-env.d.ts
+src/client/tsconfig.app.json
+src/client/tsconfig.client.json
+src/client/tsconfig.json
+src/client/tsconfig.node.json
+src/components/QuestionnaireForm.jsx
+src/index test.ts
+src/main.tsx
+src/server/index.ts
+src/server/package-lock.json
+src/server/package.json
+src/server/routes.ts
+src/server/routes/orientation.route.ts
+src/server/server.ts
+src/server/services/gemini txt.txt
+src/server/services/gemini txt2.txt
+src/server/services/gemini txt3.txt
+src/server/services/gemini txt4.txt
+src/server/services/gemini txt5 av ile deserte video.txt
+src/server/services/gemini txt6 av ile deserte video ok mais video et desert vide en conclusion.txt
+src/server/services/gemini.d.ts
+src/server/services/gemini.ts
+src/server/services/gemini.ts.txt
+src/server/services/gemini.ts1-OK.txt
+src/server/services/gemini.ts2-OK.txt
+src/server/services/gemini.ts3-OK mais pas Elowyne.txt
+src/server/test-server.js
+src/server/test.js
+src/server/test.ts
+src/server/tsconfig.server.json
+test-env.js
+test-server.js
+test.ts
+testGemini.ts
+toast.tsx
+tsconfig.base.json
+tsconfig.json
+tsconfig.test.json
+vercel.json
+vite.config.ts
+~$chietcture serveur.docx
+~$chitecture serveur.docx
+PS F:\Gill\divers\_Outils - etudes\Elowyne\replit\orientai-app>
