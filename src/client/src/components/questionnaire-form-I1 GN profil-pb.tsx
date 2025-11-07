@@ -125,7 +125,7 @@ const generateProfileMutation = useMutation({
   mutationFn: async (data: OrientationFormData) => {
     console.log("📤 Envoi des données à l'API :", data);
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/orientation`, {
+    const response = await fetch(`/api/orientation`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
