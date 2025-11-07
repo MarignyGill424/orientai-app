@@ -20,7 +20,7 @@ export default function OrientationForm() {
     setResult(null);
 
     try {
-      const response = await fetch("/orientation", {
+      const response = await fetch("/api/orientation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
