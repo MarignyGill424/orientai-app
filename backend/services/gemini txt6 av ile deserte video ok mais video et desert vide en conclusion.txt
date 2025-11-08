@@ -1,0 +1,172 @@
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import dotenv from "dotenv";
+import path from "path";
+
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
+
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+console.log("🔑 Clé Gemini chargée :", GEMINI_API_KEY?.slice(0, 5));
+
+if (!GEMINI_API_KEY) {
+  console.warn("⚠️ Clé API Gemini manquante. Réponse simulée activée.");
+}
+
+const ai = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
+
+// ✅ Fonctions d’interprétation
+function interpreterIle(reponse?: string): string {
+  const map: Record<string, string> = {
+    "Carnet et crayon": "la créativité et l’introspection",
+    "Livre préféré": "la curiosité et l’évasion",
+    "Casque audio": "la sensibilité musicale",
+    "Outil multifonction": "le pragmatisme et l’autonomie",
+    "Objet sentimental": "l’attachement affectif",
+    "Console portable": "le goût du jeu et de l’imaginaire",
+    "Application magique": "l’envie de transformer le monde",
+    "Animal de compagnie": "l’empathie et la fidélité",
+    "Nourriture préférée": "le plaisir simple et la gourmandise",
+    "Miroir ou objet symbolique": "la quête de sens et d’identité",
+    "Autre": "un univers intérieur unique",
+  };
+  return map[reponse || ""] || "Interprétation non disponible";
+}
+
+function interpreterVideos(reponse?: string): string {
+  const map: Record<string, string> = {
+    "Humour": "la créativité comique et la spontanéité",
+    "Sport": "l’énergie et l’esprit d’équipe",
+    "Musique": "la sensibilité artistique et le rythme",
+    "Science": "la curiosité intellectuelle",
+    "Séries": "le goût pour les histoires",
+    "Films": "l’imaginaire et la narration",
+    "Autre": "des intérêts originaux",
+  };
+  return map[reponse || ""] || "Interprétation non disponible";
+}
+
+// ✅ Fonction de normalisation
+function normalizeGeminiResponse(parsed: any) {
+  const rawMetiers = parsed.recommandations_carrieres || [];
+
+  const metiers = rawMetiers.map((m: any) => ({
+    titre: m.titre || "Métier sans titre",
+    description: m.description || "",
+    pourquoi_innovant_non_traditionnel: m.pourquoi_innovant_non_traditionnel || "",
+    competences_cles: m.competences_cles || [],
+    etapes_concretes: m.etapes_concretes || [],
+  }));
+
+  return {
+    analyse_profil: parsed.analyse_profil || null,
+    recommandations_carrieres: metiers,
+    conseils_generaux: parsed.conseils_generaux || { recommandations: [] },
+    ileDeserte: parsed.ileDeserte || "Aucune sélection",
+    interpretation_ileDeserte: parsed.interpretation_ileDeserte || "Interprétation non disponible",
+    videos: parsed.videos || "Aucune sélection",
+    interpretation_videos: parsed.interpretation_videos || "Interprétation non disponible"
+  };
+}
+
+// ✅ Fonction principale
+export async function generateOrientationSuggestions(formulaire: any) {
+  if (!ai) {
+    console.log("🧪 Mode simulé activé");
+    return {
+      analyse_profil: {
+        resume: "Profil simulé",
+        points_forts: ["Créatif", "Curieux"]
+      },
+      recommandations_carrieres: [],
+      conseils_generaux: { recommandations: [] },
+      ileDeserte: "Aucune sélection",
+      interpretation_ileDeserte: "Interprétation non disponible",
+      videos: "Aucune sélection",
+      interpretation_videos: "Interprétation non disponible"
+    };
+  }
+
+  try {
+    const model = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+    const prompt = generatePrompt(formulaire);
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: "application/json"
+      }
+    });
+
+    const response = result.response.text();
+    console.log("🧾 Réponse brute Gemini :", response);
+
+    const parsed = JSON.parse(response);
+    const normalized = normalizeGeminiResponse(parsed);
+    console.log("📦 Réponse normalisée :", JSON.stringify(normalized, null, 2));
+
+    return normalized;
+  } catch (error) {
+    console.error("❌ Erreur Gemini :", error);
+    throw new Error(`Erreur Gemini : ${(error as Error).message}`);
+  }
+}
+
+// ✅ Prompt enrichi
+function generatePrompt(formData: any) {
+  const enrichedForm = {
+    ...formData,
+    interpretation_ileDeserte: formData.ileDeserte
+      ? interpreterIle(formData.ileDeserte)
+      : "Interprétation non disponible",
+    interpretation_videos: formData.videos
+      ? interpreterVideos(formData.videos)
+      : "Interprétation non disponible",
+  };
+
+  return `Tu es un expert en orientation professionnelle spécialisé dans l'accompagnement des jeunes. Analyse ce profil et génère des recommandations de carrière personnalisées, en mettant l'accent sur les métiers innovants et non-traditionnels.
+
+PROFIL À ANALYSER:
+${JSON.stringify(enrichedForm, null, 2)}
+
+Ta réponse doit être un objet JSON strict, sans texte explicatif ni introduction.
+
+Inclue obligatoirement les champs suivants dans le JSON final, même s’ils sont vides :
+- analyse_profil : { resume: string, points_forts: string[], axes_de_developpement?: string[] }
+- recommandations_carrieres : Metier[]
+- conseils_generaux : { recommandations: string[] }
+- ileDeserte : string
+- interpretation_ileDeserte : string
+- videos : string
+- interpretation_videos : string
+
+Exemple de structure attendue :
+
+{
+  "analyse_profil": {
+    "resume": "...",
+    "points_forts": ["..."],
+    "axes_de_developpement": ["..."]
+  },
+  "recommandations_carrieres": [
+    {
+      "titre": "...",
+      "description": "...",
+      "pourquoi_innovant_non_traditionnel": "...",
+      "competences_cles": ["..."],
+      "etapes_concretes": ["..."]
+    }
+  ],
+  "conseils_generaux": {
+    "recommandations": ["..."]
+  },
+  "ileDeserte": "Carnet et crayon",
+  "interpretation_ileDeserte": "la créativité et l’introspection",
+  "videos": "Humour",
+  "interpretation_videos": "la créativité comique et la spontanéité"
+}
+
+Si ces champs sont absents ou non renseignés, indique :
+- "Aucune sélection" pour les réponses brutes
+- "Interprétation non disponible" pour les interprétations
+
+Ne mets rien avant ou après le JSON. Ne reformule pas. Ne commente pas. Ne justifie pas.`;
+}

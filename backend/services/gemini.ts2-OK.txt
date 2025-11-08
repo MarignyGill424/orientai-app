@@ -4,19 +4,14 @@ import path from "path";
 
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
-
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 console.log("🔑 Clé Gemini chargée :", GEMINI_API_KEY?.slice(0, 5));
 
 if (!GEMINI_API_KEY) {
   console.warn("⚠️ Clé API Gemini manquante. Réponse simulée activée.");
-  throw new Error("Clé GEMINI_API_KEY absente en production");
 }
 
-const ai = new GoogleGenerativeAI(GEMINI_API_KEY);
-console.log("🧠 Objet Gemini :", ai ? "✅ OK" : "❌ Indéfini");
-
-
+const ai = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
 
 function normalizeGeminiResponse(parsed: any) {
   const rawMetiers = parsed.recommandations_carrieres || [];
@@ -30,61 +25,11 @@ function normalizeGeminiResponse(parsed: any) {
   }));
 
   return {
-    introduction: parsed.introduction || null,
     analyse_profil: parsed.analyse_profil || null,
     recommandations_carrieres: metiers,
     conseils_generaux: parsed.conseils_generaux || { recommandations: [] }
   };
 }
-
-
-async function generateIntroduction(formulaire: any) {
-  console.log("🚀 Appel de generateIntroduction");
-
-  try {
-    if (!ai) throw new Error("Gemini API non initialisée");
-    const model = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
-
-    const prenom = formulaire.prenom;
-    const genre = formulaire.genre;
-
-    const phraseIntro =
-      genre === "femme"
-        ? `Voici le profil d’orientation de ${prenom}, elle est une adolescente pleine de potentiel.`
-        : genre === "homme"
-          ? `Voici le profil d’orientation de ${prenom}, il est un adolescent curieux et motivé.`
-          : `Voici le profil d’orientation de ${prenom}, iel est une personne pleine de ressources.`;
-
-    const prompt = `
-Tu dois répondre uniquement avec un objet JSON contenant une clé "introduction".
-
-Cette clé doit contenir exactement cette phrase :
-"${phraseIntro}"
-
-Ne modifie pas cette phrase. Ne la reformule pas. Ne fais aucun commentaire. Juste le JSON.
-
-Réponds uniquement avec ce format :
-{
-  "introduction": "${phraseIntro}"
-}
-`;
-
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: { responseMimeType: "application/json" }
-    });
-
-    const response = await result.response.text();
-    console.log("🧾 Étape intro (texte brut) :", response);
-    return JSON.parse(response);
-  } catch (error) {
-    console.error("❌ Erreur dans generateIntroduction :", error);
-    return { introduction: null };
-  }
-}
-
-
-
 
 async function generateProfilPrincipal(formulaire: any) {
   if (!ai) throw new Error("Gemini API non initialisée");
@@ -101,42 +46,14 @@ const pronoms = genre === "femme"
     ? { il: "il", le: "le", lui: "lui", son: "son", sa: "sa", ses: "ses" }
     : { il: "iel", le: "le·la", lui: "lui·elle", son: "son·sa", sa: "son·sa", ses: "ses" };
 
-
-const phraseIntro =
-  genre === "femme"
-    ? `Voici le profil d’orientation de ${prenom}, elle est une adolescente pleine de potentiel.`
-    : genre === "homme"
-      ? `Voici le profil d’orientation de ${prenom}, il est un adolescent curieux et motivé.`
-      : `Voici le profil d’orientation de ${prenom}, iel est une personne pleine de ressources.`;
-
-const phraseInspirante = `${prenom}, tu es capable de grandes choses. Garde confiance et avance avec courage.`;
-
-
-
-
-
 const prompt = `
 Tu es un assistant d'orientation bienveillant et inspirant. Ton rôle est de rédiger une analyse personnalisée du profil d’un·e adolescent·e, en t’appuyant sur ses réponses au questionnaire.
-
-⚠️ Ta première phrase doit obligatoirement être :
-"${phraseIntro}"
-
-Accorde tous les pronoms au bon genre (${pronoms.il}, ${pronoms.le}, ${pronoms.lui}, ${pronoms.son}, ${pronoms.sa}, ${pronoms.ses}).
-
-Sois chaleureux·se, motivant·e, et valorise les réponses de l’ado.
-
-Termine par une phrase encourageante comme :
-"${phraseInspirante}"
 
 Voici les données du profil :
 
 - Prénom : ${prenom}
 - Genre : ${genre}
-- Âge : ${formulaire.age}
-- Localisation : ${formulaire.mobilite}
-- Disponibilité : ${formulaire.disponibilite}
 - Passions : ${[formulaire.passion1, formulaire.passion2, formulaire.passion3, formulaire.passion4, formulaire.passion5].filter(Boolean).join(", ")}
-- Centres d’intérêt : ${formulaire.interet?.join(", ")}
 - Ce dont ${prenom} est fier·e : ${formulaire.fierte}
 - Ce qui le·la freine : ${formulaire.freins}
 - Citation personnelle : ${formulaire.citation}
@@ -149,21 +66,16 @@ Voici les données du profil :
 - Environnement préféré : ${formulaire.environnement?.join(", ")}
 - Valeurs : ${formulaire.valeurs_generales?.join(", ")}
 
+Consignes de rédaction :
 
+1. Commence par une phrase d’introduction comme : “Voici le profil d’orientation de ${prenom}, ${pronoms.il} est une personne pleine de potentiel.”
+2. Accorde tous les pronoms au bon genre (${pronoms.il}, ${pronoms.le}, ${pronoms.lui}, ${pronoms.son}, etc.)
+3. Sois chaleureux·se, motivant·e, et valorise les réponses de l’ado.
+4. Termine par une phrase encourageante comme : “${prenom} a toutes les clés pour avancer avec confiance.”
 
-Tu dois répondre uniquement avec un objet JSON. Ne fais aucun commentaire. Ne commence pas par une phrase. Ne donne pas d’explication. Juste le JSON.
-
-Tu dois renvoyer un objet JSON strictement conforme au format suivant.
-
-⚠️ La clé "introduction" est obligatoire. Elle doit contenir exactement cette phrase :
-"${phraseIntro}"
-
-Ne modifie pas cette phrase. Ne la reformule pas. Elle doit apparaître telle quelle dans la clé "introduction".
-
-Voici le format attendu :
+Format attendu :
 
 {
-  "introduction": "${phraseIntro}",
   "analyse_profil": {
     "paragraphe_intro": "...",
     "points_forts": "...",
@@ -171,10 +83,10 @@ Voici le format attendu :
     "aspirations": "...",
     "conclusion": "..."
   },
-  "message_inspirant": "${phraseInspirante}"
+  "message_inspirant": "..."
 }
+`;
 
-`; // ✅ ← ce backtick ferme le template string, et le point-virgule est bien placé
 
 
 
@@ -190,17 +102,6 @@ Voici le format attendu :
 
 async function generateInterpretations(formulaire: any) {
   if (!ai) throw new Error("Gemini API non initialisée");
-const prenom = formulaire.prenom;
-const genre = formulaire.genre;
-
-const pronoms = genre === "femme"
-  ? { il: "elle", le: "la", lui: "elle", son: "sa", sa: "sa", ses: "ses" }
-  : genre === "homme"
-    ? { il: "il", le: "le", lui: "lui", son: "son", sa: "sa", ses: "ses" }
-    : { il: "iel", le: "le·la", lui: "lui·elle", son: "son·sa", sa: "son·sa", ses: "ses" };
-
-
-
   const model = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
 
   console.log("📥 Données reçues pour interprétation :", {
@@ -251,18 +152,10 @@ Réponds en une phrase claire, bienveillante et motivante.`;
   };
 }
 
-
-
-
-
 export async function generateOrientationSuggestions(formulaire: any) {
-  console.log("🚀 Appel de generateOrientationSuggestions");
-  console.log("📥 Données reçues :", formulaire);
-
   if (!ai) {
     console.log("🧪 Mode simulé activé");
     return {
-      introduction: null,
       analyse_profil: {
         resume: "Profil simulé",
         points_forts: ["Créatif", "Curieux"]
@@ -277,27 +170,15 @@ export async function generateOrientationSuggestions(formulaire: any) {
   }
 
   try {
-    console.log("📤 Appel à generateIntroduction...");
-    const intro = await generateIntroduction(formulaire);
-    console.log("✅ Intro générée :", intro);
-
-    console.log("📤 Appel à generateProfilPrincipal...");
     const profil = await generateProfilPrincipal(formulaire);
-    console.log("✅ Profil généré :", profil);
-
-    console.log("📤 Appel à generateInterpretations...");
     const interpretations = await generateInterpretations(formulaire);
-    console.log("✅ Interprétations générées :", interpretations);
 
     const final = {
       ...normalizeGeminiResponse(profil),
-      ...interpretations,
-      introduction: intro.introduction || null
+      ...interpretations
     };
 
     console.log("📦 Réponse fusionnée :", JSON.stringify(final, null, 2));
-    console.log("✅ Final avec intro :", final);
-
     return final;
   } catch (error) {
     const message = (error as Error).message || "";
@@ -311,6 +192,3 @@ export async function generateOrientationSuggestions(formulaire: any) {
     throw new Error(`Erreur Gemini : ${message}`);
   }
 }
-
-
-

@@ -1,0 +1,195 @@
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import dotenv from "dotenv";
+import path from "path";
+
+// ✅ Chargement explicite du fichier .env
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
+
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+console.log("🔑 Clé Gemini chargée :", GEMINI_API_KEY);
+console.log("🔍 Clé API Gemini détectée :", GEMINI_API_KEY?.slice(0, 5));
+
+if (!GEMINI_API_KEY) {
+  console.warn("⚠️ Clé API Gemini manquante. Réponse simulée activée.");
+}
+
+const ai = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
+
+// ✅ Fonction de normalisation robuste
+function normalizeGeminiResponse(parsed: any) {
+  const rawMetiers = parsed.recommandations_carrieres || parsed.recommandations_carriere || [];
+
+  const metiers = rawMetiers.map((m: any) => ({
+   titre: m.titre || m.nom_metier || m.titre_carriere || "Métier sans titre",
+
+    description: m.description || "",
+    pourquoi_innovant_non_traditionnel:
+      m.pourquoi_innovant_non_traditionnel ||
+      m.pourquoi_ca_correspond ||
+      m.aspects_innovants_non_traditionnels ||
+      "",
+    lien_profil: m.lien_profil || [],
+    competences_cles: m.competences_cles || [],
+    etapes_concretes: m.etapes_concretes || [],
+    ...m
+  }));
+
+  return {
+    analyse_profil:
+      parsed.analyse_profil ||
+      parsed.profil_analyse ||
+      parsed.analyse_globale ||
+      null,
+    recommandations_carrieres: metiers,
+    conseils_generaux: Array.isArray(parsed.conseils_generaux)
+      ? { recommandations: parsed.conseils_generaux }
+      : parsed.conseils_generaux || {
+          recommandations: [
+            "Aucun conseil spécifique n’a été généré. Tu peux explorer les métiers proposés pour affiner ton projet."
+          ]
+        }
+  };
+}
+
+// ✅ Fonction principale
+export async function generateOrientationSuggestions(formData: any) {
+  console.log("📥 Données reçues :", JSON.stringify(formData, null, 2));
+
+  try {
+    const prompt = generatePrompt(formData);
+    console.log("📤 Prompt généré :", prompt);
+
+    // ✅ Mode simulé si pas de clé API
+    if (!ai) {
+      console.log("🧪 Mode simulé activé");
+      return {
+        analyse_profil: {
+          resume: "Profil analysé. Voici une réponse simulée.",
+          points_forts: ["Curieux", "Créatif", "Orienté vers l'humain"]
+        },
+        recommandations_carrieres: [
+          {
+            titre: "Designer d'expériences immersives",
+            description: "Crée des environnements interactifs en réalité augmentée.",
+            pourquoi_innovant_non_traditionnel: "Fusion entre art, technologie et narration.",
+            competences_cles: ["Unity", "Design 3D", "Storytelling"],
+            etapes_concretes: ["Explorer Unity ou Unreal Engine", "Suivre un MOOC sur XR design"]
+          }
+        ],
+        conseils_generaux: {
+          recommandations: [
+            "Participer à un hackathon",
+            "Créer un portfolio en ligne",
+            "Développer sa communication visuelle"
+          ]
+        }
+      };
+    }
+
+console.log("🚀 Initialisation du modèle Gemini...");
+
+if (!ai) {
+  console.log("🧪 Mode simulé activé");
+  return {
+  analyse_profil: {
+    resume: "Profil analysé. Voici une réponse simulée.",
+    points_forts: ["Curieux", "Créatif", "Orienté vers l'humain"]
+  },
+  recommandations_carrieres: [
+    {
+      titre: "Designer d'expériences immersives",
+      description: "Crée des environnements interactifs en réalité augmentée.",
+      pourquoi_innovant_non_traditionnel: "Fusion entre art, technologie et narration.",
+      competences_cles: ["Unity", "Design 3D", "Storytelling"],
+      etapes_concretes: ["Explorer Unity ou Unreal Engine", "Suivre un MOOC sur XR design"]
+    }
+  ],
+  conseils_generaux: {
+    recommandations: [
+      "Participer à un hackathon",
+      "Créer un portfolio en ligne",
+      "Développer sa communication visuelle"
+    ]
+  }
+};
+ // ta réponse simulée
+};
+} else {
+
+console.log("🚀 Initialisation du modèle Gemini...");
+
+  conseils_generaux: {
+    recommandations: [
+      "Participer à un hackathon",
+      "Créer un portfolio en ligne",
+      "Développer sa communication visuelle"
+    ]
+  }
+};
+ // ta réponse simulée
+} else {
+  console.log("🚀 Initialisation du modèle Gemini...");
+  const model = ai.getGenerativeModel({ model: 'gemini-2.5-flash' });
+  ...
+}
+
+
+
+
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: "application/json"
+      }
+    });
+
+console.log("✅ Contenu généré par Gemini :", result);
+
+    const text = result.response.text();
+    console.log("📨 Réponse brute de Gemini :", text);
+
+    if (!text) {
+      throw new Error("Réponse vide de l'IA");
+    }
+
+    const jsonStart = text.indexOf("{");
+    const jsonEnd = text.lastIndexOf("}");
+    const jsonString = text.slice(jsonStart, jsonEnd + 1);
+
+    let parsed;
+    try {
+      parsed = JSON.parse(jsonString);
+    } catch (parseError) {
+      console.error("❌ Erreur de parsing JSON :", parseError);
+      throw new Error("La réponse de Gemini n'est pas un JSON valide.");
+    }
+
+    console.log("✅ Réponse analysée avec succès");
+
+    const normalized = normalizeGeminiResponse(parsed);
+    console.log("📦 Réponse normalisée envoyée au frontend :", JSON.stringify(normalized, null, 2));
+
+    return normalized;
+
+  } catch (error) {
+    console.error("❌ Erreur lors de la génération des suggestions :", error);
+    throw new Error(`Impossible de générer les suggestions: ${(error as Error).message || String(error)}`);
+  }
+}
+
+// ✅ Génération du prompt
+function generatePrompt(formData: any) {
+  return `Tu es un expert en orientation professionnelle spécialisé dans l'accompagnement des jeunes. Analyse ce profil et génère des recommandations de carrière personnalisées, en mettant l'accent sur les métiers innovants et non-traditionnels.
+
+PROFIL À ANALYSER:
+${JSON.stringify(formData, null, 2)}
+
+INSTRUCTIONS:
+1. Propose des carrières innovantes et émergentes
+2. Inclus des métiers non-traditionnels 
+3. Considère les nouvelles technologies et tendances
+4. Personnalise selon les valeurs et aspirations
+5. Donne des étapes concrètes et réalisables
+
+Réponds uniquement en JSON valide selon le schéma fourni.`;
+}

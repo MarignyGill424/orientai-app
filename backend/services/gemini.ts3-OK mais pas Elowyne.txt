@@ -4,19 +4,14 @@ import path from "path";
 
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
-
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 console.log("🔑 Clé Gemini chargée :", GEMINI_API_KEY?.slice(0, 5));
 
 if (!GEMINI_API_KEY) {
   console.warn("⚠️ Clé API Gemini manquante. Réponse simulée activée.");
-  throw new Error("Clé GEMINI_API_KEY absente en production");
 }
 
-const ai = new GoogleGenerativeAI(GEMINI_API_KEY);
-console.log("🧠 Objet Gemini :", ai ? "✅ OK" : "❌ Indéfini");
-
-
+const ai = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
 
 function normalizeGeminiResponse(parsed: any) {
   const rawMetiers = parsed.recommandations_carrieres || [];
@@ -190,17 +185,6 @@ Voici le format attendu :
 
 async function generateInterpretations(formulaire: any) {
   if (!ai) throw new Error("Gemini API non initialisée");
-const prenom = formulaire.prenom;
-const genre = formulaire.genre;
-
-const pronoms = genre === "femme"
-  ? { il: "elle", le: "la", lui: "elle", son: "sa", sa: "sa", ses: "ses" }
-  : genre === "homme"
-    ? { il: "il", le: "le", lui: "lui", son: "son", sa: "sa", ses: "ses" }
-    : { il: "iel", le: "le·la", lui: "lui·elle", son: "son·sa", sa: "son·sa", ses: "ses" };
-
-
-
   const model = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
 
   console.log("📥 Données reçues pour interprétation :", {
@@ -251,13 +235,8 @@ Réponds en une phrase claire, bienveillante et motivante.`;
   };
 }
 
-
-
-
-
 export async function generateOrientationSuggestions(formulaire: any) {
   console.log("🚀 Appel de generateOrientationSuggestions");
-  console.log("📥 Données reçues :", formulaire);
 
   if (!ai) {
     console.log("🧪 Mode simulé activé");
@@ -277,17 +256,11 @@ export async function generateOrientationSuggestions(formulaire: any) {
   }
 
   try {
-    console.log("📤 Appel à generateIntroduction...");
-    const intro = await generateIntroduction(formulaire);
-    console.log("✅ Intro générée :", intro);
-
-    console.log("📤 Appel à generateProfilPrincipal...");
-    const profil = await generateProfilPrincipal(formulaire);
-    console.log("✅ Profil généré :", profil);
-
-    console.log("📤 Appel à generateInterpretations...");
-    const interpretations = await generateInterpretations(formulaire);
-    console.log("✅ Interprétations générées :", interpretations);
+    const [intro, profil, interpretations] = await Promise.all([
+      generateIntroduction(formulaire),
+      generateProfilPrincipal(formulaire),
+      generateInterpretations(formulaire)
+    ]);
 
     const final = {
       ...normalizeGeminiResponse(profil),

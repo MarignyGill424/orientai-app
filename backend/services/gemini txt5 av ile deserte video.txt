@@ -1,0 +1,165 @@
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import dotenv from "dotenv";
+import path from "path";
+
+// ✅ Chargement explicite du fichier .env
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
+
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+console.log("🔑 Clé Gemini chargée :", GEMINI_API_KEY);
+console.log("🔍 Clé API Gemini détectée :", GEMINI_API_KEY?.slice(0, 5));
+
+if (!GEMINI_API_KEY) {
+  console.warn("⚠️ Clé API Gemini manquante. Réponse simulée activée.");
+}
+
+const ai = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
+
+// ✅ Fonctions d’interprétation
+function interpreterIle(reponse?: string): string {
+  const map: Record<string, string> = {
+    "Carnet et crayon": "la créativité et l’introspection",
+    "Livre préféré": "la curiosité et l’évasion",
+    "Casque audio": "la sensibilité musicale",
+    "Outil multifonction": "le pragmatisme et l’autonomie",
+    "Objet sentimental": "l’attachement affectif",
+    "Console portable": "le goût du jeu et de l’imaginaire",
+    "Application magique": "l’envie de transformer le monde",
+    "Animal de compagnie": "l’empathie et la fidélité",
+    "Nourriture préférée": "le plaisir simple et la gourmandise",
+    "Miroir ou objet symbolique": "la quête de sens et d’identité",
+    "Autre": "un univers intérieur unique",
+  };
+  return map[reponse || ""] || "non interprété";
+}
+
+function interpreterVideos(reponse?: string): string {
+  const map: Record<string, string> = {
+    "Humour": "la créativité comique et la spontanéité",
+    "Sport": "l’énergie et l’esprit d’équipe",
+    "Musique": "la sensibilité artistique et le rythme",
+    "Science": "la curiosité intellectuelle",
+    "Séries": "le goût pour les histoires",
+    "Films": "l’imaginaire et la narration",
+    "Autre": "des intérêts originaux",
+  };
+  return map[reponse || ""] || "non interprété";
+}
+
+// ✅ Fonction de normalisation robuste
+function normalizeGeminiResponse(parsed: any) {
+  const rawMetiers = parsed.recommandations_carrieres || parsed.recommandations_carriere || [];
+
+  const metiers = rawMetiers.map((m: any) => ({
+    titre: m.titre || m.nom_metier || m.titre_carriere || "Métier sans titre",
+    description: m.description || "",
+    pourquoi_innovant_non_traditionnel:
+      m.pourquoi_innovant_non_traditionnel ||
+      m.pourquoi_ca_correspond ||
+      m.aspects_innovants_non_traditionnels ||
+      "",
+    lien_profil: m.lien_profil || [],
+    competences_cles: m.competences_cles || [],
+    etapes_concretes: m.etapes_concretes || [],
+    ...m
+  }));
+
+  return {
+    analyse_profil:
+      parsed.analyse_profil ||
+      parsed.profil_analyse ||
+      parsed.analyse_globale ||
+      null,
+    recommandations_carrieres: metiers,
+    conseils_generaux: Array.isArray(parsed.conseils_generaux)
+      ? { recommandations: parsed.conseils_generaux }
+      : parsed.conseils_generaux || {
+          recommandations: [
+            "Aucun conseil spécifique n’a été généré. Tu peux explorer les métiers proposés pour affiner ton projet."
+          ]
+        }
+  };
+}
+
+// ✅ Fonction principale
+export async function generateOrientationSuggestions(formulaire: any) {
+  if (!ai) {
+    console.log("🧪 Mode simulé activé");
+    return {
+      analyse_profil: {
+        resume: "Profil analysé. Voici une réponse simulée.",
+        points_forts: ["Curieux", "Créatif", "Orienté vers l'humain"]
+      },
+      recommandations_carrieres: [
+        {
+          titre: "Designer d'expériences immersives",
+          description: "Crée des environnements interactifs en réalité augmentée.",
+          pourquoi_innovant_non_traditionnel: "Fusion entre art, technologie et narration.",
+          competences_cles: ["Unity", "Design 3D", "Storytelling"],
+          etapes_concretes: ["Explorer Unity ou Unreal Engine", "Suivre un MOOC sur XR design"]
+        }
+      ],
+      conseils_generaux: {
+        recommandations: [
+          "Participer à un hackathon",
+          "Créer un portfolio en ligne",
+          "Développer sa communication visuelle"
+        ]
+      }
+    };
+  }
+
+  try {
+    console.log("🚀 Initialisation du modèle Gemini...");
+    const model = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+    const prompt = generatePrompt(formulaire);
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: "application/json"
+      }
+    });
+
+    const response = result.response.text();
+    console.log("📨 Réponse brute de Gemini :", response);
+
+    const parsed = JSON.parse(response);
+    const normalized = normalizeGeminiResponse(parsed);
+    console.log("📦 Réponse normalisée :", JSON.stringify(normalized, null, 2));
+
+    return normalized;
+  } catch (error) {
+    console.error("❌ Erreur lors de la génération des suggestions :", error);
+    throw new Error(`Impossible de générer les suggestions: ${(error as Error).message || String(error)}`);
+  }
+}
+
+// ✅ Génération du prompt enrichi
+function generatePrompt(formData: any) {
+  const ile = formData.ileDeserte
+    ? `Sur une île déserte, il/elle emporterait : ${formData.ileDeserte}. Cela révèle ${interpreterIle(formData.ileDeserte)}.`
+    : "Aucune réponse sur l'île déserte.";
+
+  const video = formData.videos
+    ? `Ses vidéos préférées sont de type : ${formData.videos}. Cela montre ${interpreterVideos(formData.videos)}.`
+    : "Aucune vidéo préférée renseignée.";
+
+  return `Tu es un expert en orientation professionnelle spécialisé dans l'accompagnement des jeunes. Analyse ce profil et génère des recommandations de carrière personnalisées, en mettant l'accent sur les métiers innovants et non-traditionnels.
+
+DÉTAILS COMPLÉMENTAIRES :
+${ile}
+${video}
+
+PROFIL À ANALYSER:
+${JSON.stringify(formData, null, 2)}
+
+INSTRUCTIONS:
+1. Propose des carrières innovantes et émergentes
+2. Inclus des métiers non-traditionnels 
+3. Considère les nouvelles technologies et tendances
+4. Personnalise selon les valeurs et aspirations
+5. Donne des étapes concrètes et réalisables
+
+Réponds uniquement en JSON valide selon le schéma fourni.`;
+}
