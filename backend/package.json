@@ -1,7 +1,7 @@
 {
   "name": "orientai-backend",
   "version": "1.0.0",
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
     "dev": "nodemon --watch src/server --ext ts --exec ts-node src/server/index.ts",
     "build": "tsc -p tsconfig.server.json",
