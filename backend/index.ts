@@ -12,6 +12,12 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+// ✅ Routes de test placées avant les routeurs
+app.get("/ping", (_, res) => res.send("pong"));
+app.get("/", (_req, res) => {
+  res.send("Bienvenue sur le serveur OrientAI 🚀");
+});
+
 // Route existante pour l'orientation
 app.use("/api", orientationRoute);
 
@@ -32,12 +38,6 @@ app.post("/api/gemini", async (req, res) => {
     console.error("Erreur Gemini:", err);
     res.status(500).json({ error: "Erreur lors de l'appel à Gemini" });
   }
-});
-
-// Routes de test
-app.get("/ping", (_, res) => res.send("pong"));
-app.get("/", (_req, res) => {
-  res.send("Bienvenue sur le serveur OrientAI 🚀");
 });
 
 app.listen(PORT, () => {
