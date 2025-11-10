@@ -20,13 +20,17 @@ export default defineConfig({
         changeOrigin: true,
         secure: false
       }
-    }
+    },
+    allowedHosts: [
+      'orientai-app.onrender.com', // ✅ ton domaine Render
+      'localhost'
+    ]
   },
   build: {
     outDir: 'dist',
     emptyOutDir: true,
     rollupOptions: {
-      input: path.resolve(__dirname, 'index.html') // ← point d’entrée explicite
+      input: path.resolve(__dirname, 'index.html')
     }
   }
 })
