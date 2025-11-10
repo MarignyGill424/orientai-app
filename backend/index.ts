@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import orientationRoute from "./routes/orientation.route.js";
-import { GoogleGenerativeAI } from "@google/genai"; // ✅ nouveau SDK
+import { GoogleAI } from "@google/genai"; // ✅ nouveau SDK
 
 dotenv.config();
 
@@ -30,7 +30,7 @@ app.post("/api/gemini", async (req, res) => {
     }
 
     // ✅ utilisation du nouveau client
-    const client = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+    const client = new GoogleAI({ apiKey: process.env.GEMINI_API_KEY! });
     const model = client.getGenerativeModel({ model: "gemini-1.5-pro" });
 
     const result = await model.generateContent(prompt);

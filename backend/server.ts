@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { GoogleGenerativeAI } from "@google/genai";
+import { GoogleAI } from "@google/genai"; // ✅ nouveau SDK
 
 dotenv.config();
 
@@ -11,8 +11,8 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// Initialisation du client Gemini
-const genAI = new GoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY! });
+// ✅ Initialisation du client Gemini
+const client = new GoogleAI({ apiKey: process.env.GEMINI_API_KEY! });
 
 // Endpoint de test
 app.get("/", (req, res) => {
@@ -24,7 +24,11 @@ app.post("/api/orientation", async (req, res) => {
   try {
     const { prompt } = req.body;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    if (!prompt) {
+      return res.status(400).json({ error: "Prompt manquant" });
+    }
+
+    const model = client.getGenerativeModel({ model: "gemini-1.5-pro" });
     const result = await model.generateContent(prompt);
 
     res.json({ suggestions: result.response.text() });

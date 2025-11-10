@@ -13,7 +13,7 @@ if (!GEMINI_API_KEY) {
 }
 
 // ✅ Initialisation du client Gemini
-const ai = new GoogleAI({ apiKey: GEMINI_API_KEY });
+const ai = new GoogleGenerativeAI({ apiKey: GEMINI_API_KEY });
 console.log("🧠 Objet Gemini :", ai ? "✅ OK" : "❌ Indéfini");
 
 // ----------------------------------------------------
