@@ -1,5 +1,5 @@
 import express from "express";
-import { generateOrientationSuggestions } from "../services/gemini.js";
+import { generateOrientationSuggestions } from "../services/gemini";
 
 const router = express.Router();
 

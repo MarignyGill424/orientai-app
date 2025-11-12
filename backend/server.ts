@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { GoogleAI } from "@google/genai"; // ✅ nouveau SDK
+import fetch from "node-fetch"; // ⚡ REST call
 
 dotenv.config();
 
@@ -11,15 +11,14 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// ✅ Initialisation du client Gemini
-const client = new GoogleAI({ apiKey: process.env.GEMINI_API_KEY! });
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
 
-// Endpoint de test
+// ✅ Endpoint de test
 app.get("/", (req, res) => {
-  res.send("🚀 Serveur opérationnel avec Gemini 1.5 !");
+  res.send("🚀 Serveur opérationnel avec Gemini REST !");
 });
 
-// Exemple d’endpoint pour générer des suggestions d’orientation
+// ✅ Endpoint principal pour l’orientation
 app.post("/api/orientation", async (req, res) => {
   try {
     const { prompt } = req.body;
@@ -28,13 +27,56 @@ app.post("/api/orientation", async (req, res) => {
       return res.status(400).json({ error: "Prompt manquant" });
     }
 
-    const model = client.getGenerativeModel({ model: "gemini-1.5-pro" });
-    const result = await model.generateContent(prompt);
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+        }),
+      }
+    );
 
-    res.json({ suggestions: result.response.text() });
+    const data = await response.json();
+
+    res.json({
+      suggestions: data.candidates?.[0]?.content?.parts?.[0]?.text || "Pas de réponse",
+    });
   } catch (error) {
-    console.error("❌ Erreur dans /api/orientation :", error);
-    res.status(500).json({ error: "Erreur interne du serveur" });
+    console.error("❌ Erreur REST /api/orientation :", error);
+    res.status(500).json({ error: "Erreur lors de l'appel REST à Gemini" });
+  }
+});
+
+// ✅ Endpoint /api/gemini (compatibilité avec ton frontend actuel)
+app.post("/api/gemini", async (req, res) => {
+  try {
+    const { prompt } = req.body;
+
+    if (!prompt) {
+      return res.status(400).json({ error: "Prompt manquant" });
+    }
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    res.json({
+      output: data.candidates?.[0]?.content?.parts?.[0]?.text || "Pas de réponse",
+    });
+  } catch (error) {
+    console.error("❌ Erreur REST /api/gemini :", error);
+    res.status(500).json({ error: "Erreur lors de l'appel REST à Gemini" });
   }
 });
 
