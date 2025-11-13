@@ -13,6 +13,15 @@ app.use(express.json());
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
 
+// ✅ Interface pour typer la réponse Gemini
+interface GeminiResponse {
+  candidates?: {
+    content?: {
+      parts?: { text?: string }[];
+    };
+  }[];
+}
+
 // ✅ Endpoint de test
 app.get("/", (req, res) => {
   res.send("🚀 Serveur opérationnel avec Gemini REST !");
@@ -38,7 +47,7 @@ app.post("/api/orientation", async (req, res) => {
       }
     );
 
-    const data = await response.json();
+    const data = (await response.json()) as GeminiResponse;
 
     res.json({
       suggestions: data.candidates?.[0]?.content?.parts?.[0]?.text || "Pas de réponse",
@@ -69,7 +78,7 @@ app.post("/api/gemini", async (req, res) => {
       }
     );
 
-    const data = await response.json();
+    const data = (await response.json()) as GeminiResponse;
 
     res.json({
       output: data.candidates?.[0]?.content?.parts?.[0]?.text || "Pas de réponse",
